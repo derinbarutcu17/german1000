@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { displayWord, type WordRecord } from "../data/records";
 import { WordExamples } from "./WordExamples";
 
 export function WordCard({ record }: { record: WordRecord }) {
+  const [examplesOpen, setExamplesOpen] = useState(false);
+
   return (
     <article className="word-card word-card--index" id={"word-" + String(record.rank).padStart(3, "0")}>
       <div className="word-card-topline">
@@ -18,9 +23,9 @@ export function WordCard({ record }: { record: WordRecord }) {
       <p className="word-explanation">{record.explanation}</p>
       {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
       {record.reviewStatus === "unreviewed" && <p className="content-review-note">Frequency source · explanation pending editorial review</p>}
-      <details className="word-details">
+      <details className="word-details" open={examplesOpen} onToggle={(event) => setExamplesOpen(event.currentTarget.open)}>
         <summary>See three usage examples <span aria-hidden="true">↓</span></summary>
-        <WordExamples record={record} compact withAudio={false} />
+        {examplesOpen && <WordExamples record={record} compact withAudio={false} />}
       </details>
     </article>
   );

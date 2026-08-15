@@ -9,6 +9,15 @@ import { WordExamples } from "./components/WordExamples";
 import { displayWord, records, type WordRecord } from "./data/records";
 import { shuffle } from "./lib/random";
 
+function focusElement(element: HTMLElement | null) {
+  if (!element) return;
+  element.focus();
+  element.scrollIntoView({
+    block: "center",
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+  });
+}
+
 export default function FlashcardsPage() {
   const [deck, setDeck] = useState<WordRecord[]>([]);
   const [position, setPosition] = useState(0);
@@ -29,7 +38,7 @@ export default function FlashcardsPage() {
     if (!record) return;
     setRevealed(true);
     setAnnouncement("Explanation revealed for " + displayWord(record) + ".");
-    window.setTimeout(() => backRef.current?.focus(), 0);
+    window.setTimeout(() => focusElement(backRef.current), 0);
   }
 
   function nextCard() {
@@ -38,7 +47,7 @@ export default function FlashcardsPage() {
       setComplete(true);
       setRevealed(false);
       setAnnouncement("You reached all 1,000 cards. Shuffle again to start a new round.");
-      window.setTimeout(() => completeRef.current?.focus(), 0);
+      window.setTimeout(() => focusElement(completeRef.current), 0);
       return;
     }
 
@@ -46,7 +55,13 @@ export default function FlashcardsPage() {
     setPosition((current) => current + 1);
     setRevealed(false);
     setAnnouncement(next ? "Next card: " + displayWord(next) + "." : "Next card.");
-    window.setTimeout(() => wordRef.current?.focus(), 0);
+    window.setTimeout(() => focusElement(wordRef.current), 0);
+  }
+
+  function showFront() {
+    setRevealed(false);
+    setAnnouncement("Front of the card restored.");
+    window.setTimeout(() => focusElement(wordRef.current), 0);
   }
 
   function shuffleAgain() {
@@ -55,7 +70,7 @@ export default function FlashcardsPage() {
     setRevealed(false);
     setComplete(false);
     setAnnouncement("A new order of all 1,000 cards is ready.");
-    window.setTimeout(() => wordRef.current?.focus(), 0);
+    window.setTimeout(() => focusElement(wordRef.current), 0);
   }
 
   return (
@@ -103,7 +118,7 @@ export default function FlashcardsPage() {
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
             </div>
           ) : (
-            <article className={"flashcard" + (revealed ? " flashcard--revealed" : "")} aria-labelledby="flashcard-word">
+            <article className={"flashcard" + (revealed ? " flashcard--revealed" : "")} aria-label={displayWord(record)}>
               <div className="flashcard-topline">
                 <span>#{String(record.rank).padStart(3, "0")}</span>
                 <span>{record.kind}</span>
@@ -131,7 +146,7 @@ export default function FlashcardsPage() {
                   {record.reviewStatus === "unreviewed" && <p className="content-review-note">Frequency source · explanation pending editorial review</p>}
                   <WordExamples record={record} />
                   <div className="flashcard-actions">
-                    <button className="button button--secondary" type="button" onClick={() => setRevealed(false)}>Show the front</button>
+                    <button className="button button--secondary" type="button" onClick={showFront}>Show the front</button>
                     <button className="button button-dark" type="button" onClick={nextCard}>Next random card <span aria-hidden="true">↗</span></button>
                   </div>
                 </div>

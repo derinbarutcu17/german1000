@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { AudioButton } from "../components/AudioButton";
 import { FeedbackPanel } from "../components/FeedbackPanel";
@@ -10,6 +10,15 @@ import { WordExamples } from "../components/WordExamples";
 import { records } from "../data/records";
 import { buildExerciseBank, type ExerciseItem } from "../lib/exercises";
 
+function focusElement(element: HTMLElement | null) {
+  if (!element) return;
+  element.focus();
+  element.scrollIntoView({
+    block: "center",
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+  });
+}
+
 export default function ExercisesPage() {
   const [bank, setBank] = useState<ExerciseItem[]>([]);
   const [index, setIndex] = useState(0);
@@ -17,6 +26,8 @@ export default function ExercisesPage() {
   const [submitted, setSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [announcement, setAnnouncement] = useState("");
+  const questionTitleRef = useRef<HTMLHeadingElement>(null);
+  const completeTitleRef = useRef<HTMLHeadingElement>(null);
   const item = bank[index];
   const selectedOption = item?.options.find((option) => option.value === selected) ?? null;
   const isCorrect = Boolean(selectedOption?.correct);
@@ -34,6 +45,7 @@ export default function ExercisesPage() {
     setSubmitted(false);
     setCorrectCount(0);
     setAnnouncement("A new order of all 1,000 questions is ready.");
+    window.setTimeout(() => focusElement(questionTitleRef.current), 0);
   }
 
   function submitAnswer() {
@@ -48,6 +60,7 @@ export default function ExercisesPage() {
       setSelected(null);
       setSubmitted(false);
       setAnnouncement("You reached all 1,000 questions. Shuffle again to start a new round.");
+      window.setTimeout(() => focusElement(completeTitleRef.current), 0);
       return;
     }
 
@@ -55,6 +68,7 @@ export default function ExercisesPage() {
     setSelected(null);
     setSubmitted(false);
     setAnnouncement("Next question.");
+    window.setTimeout(() => focusElement(questionTitleRef.current), 0);
   }
 
   return (
@@ -82,7 +96,7 @@ export default function ExercisesPage() {
         ) : complete ? (
           <section className="empty-state exercise-complete" aria-labelledby="exercise-complete-title">
             <p className="eyebrow">ROUND COMPLETE</p>
-            <h2 id="exercise-complete-title">All 1,000 questions answered.</h2>
+            <h2 id="exercise-complete-title" ref={completeTitleRef} tabIndex={-1}>All 1,000 questions answered.</h2>
             <p>You made it through this temporary question order with {correctCount} correct answers. Reloading or reshuffling starts clean.</p>
             <div className="empty-state-action">
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
@@ -100,7 +114,7 @@ export default function ExercisesPage() {
                 <p className="eyebrow">{item.promptLabel}</p>
                 {item.audio && <AudioButton text={item.audio} label="Hear this prompt" />}
               </div>
-              <h2 id="question-title" lang="de">{item.prompt}</h2>
+              <h2 id="question-title" ref={questionTitleRef} tabIndex={-1} lang="de">{item.prompt}</h2>
             </div>
             <fieldset className="choice-group">
               <legend>{item.instruction}</legend>
