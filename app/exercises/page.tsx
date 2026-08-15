@@ -1,82 +1,71 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { AppShell } from "../components/AppShell";
 import { AudioButton } from "../components/AudioButton";
-import { EmptyState } from "../components/EmptyState";
 import { FeedbackPanel } from "../components/FeedbackPanel";
 import { Footer } from "../components/Footer";
 import { WordExamples } from "../components/WordExamples";
 import { records } from "../data/records";
-import { buildExerciseBank, type ExerciseItem, type ExerciseMode } from "../lib/exercises";
-import { useLearningStore } from "../lib/learning/useLearningStore";
-
-const modes: Array<{ id: ExerciseMode; label: string; description: string }> = [
-  { id: "meaning", label: "Meaning", description: "Choose the closest English meaning." },
-  { id: "word", label: "Recall", description: "Choose the German word that fits." },
-  { id: "article", label: "Article", description: "Choose the correct der, die, or das." },
-];
-
-function readMode() {
-  if (typeof window === "undefined") return "meaning" as ExerciseMode;
-  const value = new URLSearchParams(window.location.search).get("mode");
-  return value === "word" || value === "article" ? value : "meaning";
-}
+import { buildExerciseBank, type ExerciseItem } from "../lib/exercises";
 
 export default function ExercisesPage() {
-  const store = useLearningStore();
-  const [mode, setMode] = useState<ExerciseMode>("meaning");
+  const [bank, setBank] = useState<ExerciseItem[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
-
-  useEffect(() => {
-    const initialTimer = window.setTimeout(() => setMode(readMode()), 0);
-    const syncMode = () => setMode(readMode());
-    window.addEventListener("popstate", syncMode);
-    return () => {
-      window.clearTimeout(initialTimer);
-      window.removeEventListener("popstate", syncMode);
-    };
-  }, []);
-
-  const bank = useMemo(() => buildExerciseBank(records, mode, 12), [mode]);
-  const item: ExerciseItem | undefined = bank[index];
+  const [announcement, setAnnouncement] = useState("");
+  const item = bank[index];
   const selectedOption = item?.options.find((option) => option.value === selected) ?? null;
   const isCorrect = Boolean(selectedOption?.correct);
+  const complete = bank.length > 0 && index >= bank.length;
 
-  function chooseMode(nextMode: ExerciseMode) {
-    window.history.pushState(null, "", window.location.pathname + "?mode=" + nextMode);
-    setMode(nextMode);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setBank(buildExerciseBank(records, records.length)), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  function shuffleAgain() {
+    setBank(buildExerciseBank(records, records.length));
     setIndex(0);
     setSelected(null);
     setSubmitted(false);
     setCorrectCount(0);
+    setAnnouncement("A new order of all 1,000 questions is ready.");
   }
 
   function submitAnswer() {
-    if (!selected || submitted) return;
+    if (!selected || submitted || !item) return;
     setSubmitted(true);
     if (isCorrect) setCorrectCount((count) => count + 1);
-    if (item) store.exerciseAttempt(item.record.rank, isCorrect ? "correct" : "wrong");
   }
 
   function nextQuestion() {
-    setIndex((current) => (current + 1) % bank.length);
+    if (index + 1 >= bank.length) {
+      setIndex(bank.length);
+      setSelected(null);
+      setSubmitted(false);
+      setAnnouncement("You reached all 1,000 questions. Shuffle again to start a new round.");
+      return;
+    }
+
+    setIndex((current) => current + 1);
     setSelected(null);
     setSubmitted(false);
+    setAnnouncement("Next question.");
   }
 
   return (
-    <AppShell knownCount={store.knownCount}>
+    <AppShell>
       <main id="main-content" className="page-stack exercise-page">
+        <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
         <section className="section-heading" aria-labelledby="exercise-title">
           <div>
-            <p className="eyebrow">Active recall</p>
+            <p className="eyebrow">Random retrieval</p>
             <h1 id="exercise-title">Exercises</h1>
-            <p className="lede">Use short prompts to test what you can retrieve. These exercises are practice, not a hidden progress reset.</p>
+            <p className="lede">One meaning exercise, shuffled across all 1,000 words. There is no daily limit, saved score, or hidden schedule.</p>
           </div>
           <div className="score-card" aria-label="Exercise score">
             <span className="score-card__number">{correctCount}</span>
@@ -84,28 +73,26 @@ export default function ExercisesPage() {
           </div>
         </section>
 
-        <nav className="mode-tabs" aria-label="Exercise type">
-          {modes.map((exerciseMode) => (
-            <Link
-              key={exerciseMode.id}
-              href={"/exercises?mode=" + exerciseMode.id}
-              className={mode === exerciseMode.id ? "mode-tab mode-tab--active" : "mode-tab"}
-              aria-current={mode === exerciseMode.id ? "page" : undefined}
-              onClick={(event) => {
-                event.preventDefault();
-                chooseMode(exerciseMode.id);
-              }}
-            >
-              <span>{exerciseMode.label}</span>
-              <small>{exerciseMode.description}</small>
-            </Link>
-          ))}
-        </nav>
-
-        {item ? (
+        {!bank.length ? (
+          <div className="exercise-card exercise-loading" aria-live="polite">
+            <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
+            <p className="eyebrow">SHUFFLING 1,000 QUESTIONS</p>
+            <h2>Finding a fresh path through the vocabulary.</h2>
+          </div>
+        ) : complete ? (
+          <section className="empty-state exercise-complete" aria-labelledby="exercise-complete-title">
+            <p className="eyebrow">ROUND COMPLETE</p>
+            <h2 id="exercise-complete-title">All 1,000 questions answered.</h2>
+            <p>You made it through this temporary question order with {correctCount} correct answers. Reloading or reshuffling starts clean.</p>
+            <div className="empty-state-action">
+              <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
+              <Link className="button button--secondary" href="/">Return to cards</Link>
+            </div>
+          </section>
+        ) : item ? (
           <section className="exercise-card" aria-labelledby="question-title">
             <div className="exercise-card__header">
-              <span>Question {index + 1} of {bank.length}</span>
+              <span>Question {index + 1} of {bank.length.toLocaleString()}</span>
               <span>{item.record.kind}</span>
             </div>
             <div className="exercise-prompt">
@@ -113,13 +100,12 @@ export default function ExercisesPage() {
                 <p className="eyebrow">{item.promptLabel}</p>
                 {item.audio && <AudioButton text={item.audio} label="Hear this prompt" />}
               </div>
-              <h2 id="question-title">{item.prompt}</h2>
-              {item.record.usageNote && <p>{item.record.usageNote}</p>}
+              <h2 id="question-title" lang="de">{item.prompt}</h2>
             </div>
             <fieldset className="choice-group">
               <legend>{item.instruction}</legend>
               {item.options.map((option) => {
-                const optionId = "exercise-option-" + option.value.replace(/\s+/g, "-").toLowerCase();
+                const optionId = "exercise-option-" + item.record.rank + "-" + option.value;
                 const stateClass = submitted && option.correct ? "choice choice--correct" : submitted && selected === option.value ? "choice choice--incorrect" : "choice";
                 return (
                   <label className={stateClass} key={option.value} htmlFor={optionId}>
@@ -140,33 +126,31 @@ export default function ExercisesPage() {
             </fieldset>
             <div className="exercise-actions">
               {!submitted ? (
-                <button type="button" className="button button--primary" onClick={submitAnswer} disabled={!selected}>
+                <button type="button" className="button button-dark" onClick={submitAnswer} disabled={!selected}>
                   Check answer
                 </button>
               ) : (
-                <button type="button" className="button button--primary" onClick={nextQuestion}>
-                  Next question
+                <button type="button" className="button button-dark" onClick={nextQuestion}>
+                  {index + 1 >= bank.length ? "Finish round" : "Next question"}
                 </button>
               )}
-              <span className="exercise-position">{index + 1} / {bank.length}</span>
+              <span className="exercise-position">{index + 1} / {bank.length.toLocaleString()}</span>
             </div>
             {submitted && (
               <div className="exercise-feedback">
-                <FeedbackPanel correct={isCorrect} answer={selectedOption?.label ?? item.answer} />
+                <FeedbackPanel correct={isCorrect} answer={item.answer} />
                 <WordExamples record={item.record} />
               </div>
             )}
           </section>
-        ) : (
-          <EmptyState title="No exercise available" body="There are no words available for this exercise mode yet." action={<Link className="button button--primary" href="/">Return to today</Link>} />
-        )}
+        ) : null}
 
-        <aside className="callout" aria-label="How exercises affect progress">
-          <strong>How this works</strong>
-          <p>Answer quality helps you practice retrieval. Only the daily review buttons change a word’s learning schedule, so you always know what your progress means.</p>
+        <aside className="callout" aria-label="How exercises work">
+          <strong>Just open and play.</strong>
+          <p>Every refresh and every shuffle creates a new in-memory order of the full vocabulary. Your answers help this round only; nothing is written to an account or database.</p>
         </aside>
       </main>
-      <Footer onReset={store.resetProgress} />
+      <Footer />
     </AppShell>
   );
 }

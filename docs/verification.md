@@ -4,134 +4,71 @@
 
 - Audit date: 2026-08-15.
 - Source archive: `/Users/derin/Downloads/german1000-source.zip`.
-- Local test copy: extracted into a disposable workspace and then copied into this repository without generated build/runtime folders.
-- Browser widths exercised: 1440px, 375px, and 280px.
-- The local dev server was tested on both a fresh origin and a returning origin to separate first-visit behavior from persisted state.
+- Local implementation: `/Users/derin/Documents/Codex/2026-08-15/yeah-can-you-do-a-big/outputs/german1000-design-audit`.
+- Browser checks: local Vite preview at 1280px and an explicit 280px viewport.
+- Persistence contract: no production route imports a learning store, local-storage adapter, session scheduler, or Method page.
 
-## Post-overhaul verification
-
-The historical browser journeys below are intentionally retained as baseline evidence from before implementation. The current implementation was rechecked after the overhaul.
+## Release gates
 
 | Check | Result | Evidence |
 | --- | --- | --- |
-| `npm run typecheck` | PASS | Full app, Worker, and D1 type surface checked with `@cloudflare/workers-types`. |
+| `npm run typecheck` | PASS | App and Worker type surface checked with strict TypeScript. |
 | `npm run lint` | PASS | Zero ESLint errors or warnings. |
-| `npm run test:unit` | PASS | 25 tests: scheduler, frozen sessions, migration, storage, content, and exercise banks. |
-| `npm run test:content` | PASS | 1,000 contiguous, unique ranks. |
-| `npm run build` | PASS | Vinext production build and Sites artifact validation completed on macOS without GNU `timeout`. |
-| `npm run build:github-pages` | PASS | Production route snapshots for `/`, `/explore/`, `/exercises/`, and `/method/` completed with project-prefixed assets and a `.nojekyll` marker. |
-| GitHub Pages deployment | PASS | The Pages workflow completed successfully from `main`; live URL: https://derinbarutcu17.github.io/german1000-design-audit/ |
-| Route smoke | PASS | `/`, `/explore`, `/exercises?mode=meaning`, `/exercises?mode=word`, `/exercises?mode=article`, and `/method` return HTML; unknown route returns 404. |
-| Today interaction | PASS | Reveal → I know it advances `#001` to `#002`; reload preserves the same session cursor. |
-| Exercise interaction | PASS | Article radio group exposes native choices and one live correct-feedback result. |
-| Explore interaction | PASS | Search/filter query state renders one matching card and stays within the viewport at the active desktop width. |
-
-Manual browser screenshots were captured for the rebuilt Today, Explore, and Exercises surfaces during this verification pass. A full VoiceOver certification, exact six-width viewport matrix, and real-device speech matrix remain follow-up release checks rather than being represented as passed here.
-
-## Historical baseline build and static checks
-
-| Check | Result | Notes |
-| --- | --- | --- |
-| `npm ci` | PASS | Installed dependencies; npm emitted non-blocking warnings about deprecated packages/blocked install scripts. |
-| `npm run lint` | PASS | No lint errors. |
-| `bash scripts/sites-env.sh -- node_modules/.bin/vinext build` | PASS | Production-style build completed. |
-| `bash scripts/sites-env.sh -- bash scripts/validate-artifact.sh` | PASS | Sites artifact validation completed. |
-| `node --test tests/rendered-html.test.mjs` | PASS | One rendered HTML smoke test passed. |
-| `npm test` | ENVIRONMENT LIMIT | Wrapper requires GNU `timeout`, which is not available on the macOS environment. Underlying build, artifact validation, and rendered HTML test passed independently. |
-| Impeccable detector | REVIEW | Flagged a single-side feedback border and a width transition. |
+| `npm run test:unit` | PASS | 7 tests covering the contiguous dataset, seeded randomized 1,000-question bank, unique choices, shuffle integrity, search, type filtering, and full-index behavior. |
+| `npm run test:content` | PASS | 1,000 contiguous, unique ranked forms. |
+| `npm run build` | PASS | Vinext production build and Sites artifact validation completed. |
+| `npm run build:github-pages` | PASS | Static snapshots created for `/`, `/explore/`, and `/exercises/`; no Method snapshot is produced. |
+| `node --test tests/rendered-html.test.mjs` | PASS | Three public routes render HTML; `/method` and an unknown route return 404. |
+| Browser console | PASS | No error-level messages during the local Cards, Explore, or Exercises checks. |
 
 ## Browser journeys
 
-### Practice — fresh user
+### Cards — landing flashcard
 
-1. Loaded the homepage.
-2. Verified the hero, stats, practice card, audio control, and reveal action.
-3. Revealed the meaning and verified explanation/examples plus Again/I know actions.
-4. Selected I know it.
-5. Observed header `1/1,000`, `0% complete`, daily `2 / 10`, and current rank `#003`.
+1. Loaded `/` at the default 1280px viewport.
+2. Verified the “Cards” route, no-account note, shuffled card counter, German front, and audio control.
+3. Selected “Reveal the back” and verified the meaning, explanation, editorial note where applicable, and all three examples.
+4. Selected “Next random card” and verified the counter moved from `Card 001 / 1,000` to a fresh second card with the answer hidden.
+5. Reloaded the route and verified it returned to `Card 001 / 1,000` with a new random record in the local run.
 
-**Result:** FAIL — rank `#002` is skipped and progress indicators disagree. See [`14-practice-skips-rank-002.png`](evidence/screenshots/14-practice-skips-rank-002.png).
+**Result:** PASS. The full no-repeat order and 1,000-record coverage are enforced by the shared Fisher–Yates shuffle and content tests; the browser journey covers the visible start/reveal/advance/reload contract.
 
-### Practice — returning user
+### Explore — one-page 1,000-word index
 
-1. Saved progress through the primary practice action.
-2. Reloaded the same origin.
-3. Observed the React development error overlay and console hydration mismatch: server value `0`, client value `1`.
+1. Loaded `/explore` at 1280px.
+2. Counted 1,000 `article` records and 1,000 stable rank anchors.
+3. Confirmed there is no Previous, Next, Page, or progress control.
+4. Measured `document.body.scrollWidth === window.innerWidth` at 1280px.
+5. Set the viewport to 280px and repeated the count and width check.
+6. Verified Search remains visible at 280px and the body width remains exactly 280px.
 
-**Result:** FAIL — storage is read during initial render. See [`03-returning-hydration-error.png`](evidence/screenshots/03-returning-hydration-error.png).
+**Result:** PASS. The complete list is one continuous document, with native example disclosures and no horizontal overflow in the tested narrow viewport.
 
-### Explore — baseline, search, and full list
+### Exercises — randomized 1,000-question meaning bank
 
-1. Opened Explore at desktop width.
-2. Verified 1,000 results, search, rank/type filters, pagination, and card disclosures.
-3. Searched `Haus`; observed 7 results, including records matching supporting explanation/example text.
-4. Cleared the search and selected Show all 1,000.
-5. Measured 1,000 cards, roughly 6,010 buttons, 135,126px document height, and 1,425px body width.
+1. Loaded `/exercises` and waited for the client-only bank to finish shuffling.
+2. Verified `Question 1 of 1,000`, four native radio inputs, and no mode tabs.
+3. Selected an answer and verified one live `Correct.` or `Not quite.` result, the correct answer, and context examples.
+4. Selected “Next question” and verified `Question 2 of 1,000`.
 
-**Result:** PARTIAL — baseline and pagination are usable; all-results path is unbounded. See [`05-explore-viewport.png`](evidence/screenshots/05-explore-viewport.png), [`06-explore-search.png`](evidence/screenshots/06-explore-search.png), and [`07-explore-all-1000.png`](evidence/screenshots/07-explore-all-1000.png).
+**Result:** PASS. The unit contract additionally verifies all 1,000 ranks appear exactly once, each item has one correct answer, each choice label is unique, and two seeded orders differ.
 
-### Exercises — meaning and sentence context
+### Removed surface
 
-1. Opened Meaning mode and verified the four-choice answer layout.
-2. Selected a wrong answer and verified corrective text, explanation, and examples.
-3. Advanced to the next exercise.
-4. Switched to Sentence context mode.
-5. Selected the correct answer and verified correct feedback and explanation.
+`/method` returns HTTP 404 in the local production server, and the Pages artifact contains no Method route. The old Today, progress, pagination, and reset surfaces are absent from the current navigation and production imports.
 
-**Result:** PARTIAL — visual interaction works; progress semantics, choice roles, live feedback, and scheduler integration need repair. See [`08-exercise-meaning.png`](evidence/screenshots/08-exercise-meaning.png) and [`09-exercise-context-correct.png`](evidence/screenshots/09-exercise-context-correct.png).
+## Historical baseline
 
-### Method
-
-1. Opened Method.
-2. Verified three method sections, six source links, and the corpus-ranking caveat.
-
-**Result:** PASS visually, but the behavioral claims need to be aligned with the actual scheduler. See [`10-method-sources.png`](evidence/screenshots/10-method-sources.png).
-
-### Responsive
-
-1. Loaded the homepage at 375px.
-2. Opened Explore and scrolled the result area.
-3. Repeated Explore at 280px.
-4. Measured body width greater than viewport width and observed clipped search content.
-
-**Result:** PASS at 375px; FAIL at 280px due to horizontal overflow. See [`11-home-mobile-375.png`](evidence/screenshots/11-home-mobile-375.png), [`12-explore-mobile-375.png`](evidence/screenshots/12-explore-mobile-375.png), and [`13-explore-mobile-280-overflow.png`](evidence/screenshots/13-explore-mobile-280-overflow.png).
-
-## Static accessibility observations
-
-Observed positives:
-
-- Native buttons and links are used for most actions.
-- Audio buttons have accessible labels.
-- A visible `:focus-visible` rule exists for buttons, links, inputs, selects, and summaries.
-- Native `details` is used for expansions.
-
-Observed gaps:
-
-- `html lang="en"` with no `lang="de"` spans.
-- No skip link.
-- Progress track has `aria-label` but no progressbar role/value attributes.
-- Answer buttons use `aria-pressed` rather than a radio-group model.
-- Dynamic result feedback has no live-region semantics.
-- Full keyboard traversal was not fully verifiable in this browser backend; it should be tested with a real keyboard and screen reader before sign-off.
-
-## Static design and code observations
-
-- `app/page.tsx` is a 753-line client component, so route-level and server-safe boundaries are not yet established.
-- `app/globals.css` includes a 3px single-side feedback border and a width transition flagged by the Impeccable detector.
-- There is no `prefers-reduced-motion` rule.
-- The loaded Geist variables are not used as the active global font token; Arial is active and Georgia is used for the context prompt.
-- The existing test suite is a rendered HTML smoke test, not a learning-loop contract test.
+The original audit evidence remains in [`docs/design-audit.md`](design-audit.md) and [`docs/evidence/`](evidence/). Those screenshots and findings document the earlier persisted Today/scheduler implementation; they are baseline evidence, not claims about the current stateless UI.
 
 ## Evidence limits
 
 This record does not certify:
 
-- full WCAG conformance;
-- complete screen-reader behavior;
-- all 1,000 translation records;
-- real-device browser speech behavior;
-- storage quota/private-mode behavior in every browser;
-- dark mode, which the current site does not implement;
-- production network/CDN performance.
+- complete WCAG conformance or a full VoiceOver certification;
+- real-device speech behavior across every browser;
+- linguistic correctness of every generated explanation;
+- production CDN performance under a large number of concurrent visitors;
+- dark mode, which the current site does not implement.
 
-The accessibility and UI review was cross-checked against the [Vercel Web Interface Guidelines](https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md) and the local design-focused review skills available in the workspace.
+The implementation was reviewed against the local accessibility and design guidance available in the workspace. The next release gate is the GitHub Pages workflow from `main`, followed by a short live smoke check of the same three routes.

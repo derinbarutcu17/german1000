@@ -1,59 +1,36 @@
 # German 1000 — information architecture and flow map
 
-## Current model
-
-The current product is one client-rendered route with four stateful views. The shared hero, stats, and footer stay in the page while the active content changes.
+The product is deliberately small at the route level. A static 1,000-record dataset powers three surfaces; every temporary interaction stays in memory and disappears on reload.
 
 ```mermaid
 flowchart TD
-  Root["/ — client-rendered shell"] --> Hero["Hero + stats"]
-  Hero --> Practice["Practice tab"]
-  Hero --> Explore["Explore tab"]
-  Hero --> Exercises["Exercises tab"]
-  Hero --> Method["Method tab"]
-  Practice --> Reveal["Reveal meaning"]
-  Reveal --> Again["Again"]
-  Reveal --> Know["I know it"]
-  Again --> Practice
-  Know --> Practice
-  Explore --> Search["Search + rank/type filters"]
-  Search --> Page["Paginated results"]
-  Search --> All["Show all 1,000"]
-  Page --> Details["Expand examples"]
-  All --> Details
-  Exercises --> Meaning["Meaning mode"]
-  Exercises --> Context["Sentence context mode"]
-  Meaning --> Answer["Answer → feedback → next"]
-  Context --> Answer
-  Method --> Sources["Six sources + caveat"]
-  Footer["Footer reset"] --> Reset["Clear local progress"]
-```
-
-## Recommended model
-
-The visual language can remain a shared shell, but the tools should become addressable destinations with explicit state.
-
-```mermaid
-flowchart TD
-  Shell["Shared shell"] --> Today["/ — Today"]
-  Shell --> Explore2["/explore"]
-  Shell --> Exercises2["/exercises"]
-  Shell --> Method2["/method"]
-  Today --> Session["Stable practice session"]
-  Session --> Review["Review outcome"]
-  Review --> Scheduler["Persist due date + learner state"]
-  Explore2 --> Query["URL: q, rank, type, page"]
-  Query --> Results["Bounded result list"]
-  Exercises2 --> Mode["URL or local mode"]
-  Mode --> ExerciseState["Accessible answer state"]
-  ExerciseState --> Scheduler
-  Method2 --> Contract["Explains the actual method"]
+  Shell["Shared shell"] --> Cards["/ — Cards"]
+  Shell --> Explore["/explore — Explore"]
+  Shell --> Exercises["/exercises — Exercises"]
+  Cards --> LoadDeck["Create shuffled order of all 1,000"]
+  LoadDeck --> Front["German word + audio + reveal"]
+  Front --> Back["Meaning + explanation + 3 examples"]
+  Back --> Next["Next random card"]
+  Next --> Front
+  Next --> Complete["After card 1,000: round complete"]
+  Complete --> LoadDeck
+  Explore --> Filters["Ephemeral search + valid word type"]
+  Filters --> Index["One continuous 1,000-word page"]
+  Index --> Details["Native example disclosures"]
+  Exercises --> LoadBank["Create shuffled 1,000-question bank"]
+  LoadBank --> Question["German word + 4 meaning choices"]
+  Question --> Feedback["Correct answer + explanation"]
+  Feedback --> NextQuestion["Next question"]
+  NextQuestion --> Question
+  NextQuestion --> ExerciseComplete["After question 1,000: round complete"]
+  ExerciseComplete --> LoadBank
 ```
 
 ## Navigation principles
 
-- Use real links for primary destinations.
-- Keep the current view in the URL.
-- Keep search, filters, and page in the URL if sharing and refresh matter.
-- When a view changes, focus a meaningful heading or landmark.
-- Keep the Practice landing surface spacious, but give secondary tools a route-level header so the task starts sooner.
+- Use real links for the three public destinations and preserve the current location in the URL.
+- Keep only search and word-type filters shareable on Explore; they are convenience state, not learner state.
+- Treat reload as a clean start for Cards and Exercises. No cookies, local storage, IndexedDB, server session, or database write is part of the product contract.
+- Put the German word before its explanation so the user can recall first and verify second.
+- Keep the 1,000-word index genuinely scrollable instead of dividing it into pages or replacing it with a virtualized window.
+- At the end of either deck, say exactly what happened and provide one clear shuffle action.

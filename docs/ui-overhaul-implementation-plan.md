@@ -1,14 +1,56 @@
 # German 1000 — UI and experience overhaul implementation plan
 
-**Status:** Implemented in the published first-release codebase; final product/content review remains.
+**Status:** The original scheduler-oriented plan is historical; the active stateless pivot is implemented in the published codebase.
 **Target:** Existing German 1000 Next/Vinext application
-**Primary outcome:** Make the site feel like a trustworthy daily language-learning product, not a polished static list with learning features layered on top.
+**Primary outcome:** Make German 1000 an immediate, whimsical 1,000-word environment that works without a database, account, or saved progress.
 
 This plan is intentionally implementation-oriented. It converts the audit into a sequence of small, reviewable changes with explicit source files, state contracts, component responsibilities, test gates, and release criteria.
 
 The active design-system summary is [`DESIGN.md`](../DESIGN.md). Post-implementation verification is recorded in [`docs/verification.md`](verification.md).
 
-## 1. Executive direction
+## Current implementation plan — stateless pivot
+
+The user-facing product contract was narrowed after the original audit: remove the Method story and all persistence-oriented UI; make the landing page the flashcard exercise; make Exercises one randomized 1,000-question meaning bank; and make Explore one continuous 1,000-word page.
+
+### Wave A — Remove false product promises
+
+- Remove the Today label, daily count, global progress bar, review buttons, reset control, Method route, Method navigation, and learner-status filters.
+- Remove the client learning store and its storage/scheduler tests once all production imports are gone.
+- Keep editorial `reviewStatus` only when it helps explain source/content confidence; never present it as learner progress.
+
+### Wave B — Build the ephemeral card deck
+
+- Add a pure Fisher–Yates shuffle utility with injectable randomness for tests and `crypto.getRandomValues()` in the browser.
+- Initialize the deck after the server-safe loading frame to prevent hydration mismatches.
+- Shuffle the complete static `records` array, keep one in-memory position, reveal only the active record’s back, and stop explicitly after card 1,000.
+- Expose gloss, explanation, usage note, and all three examples behind the active card. Reload and “Shuffle again” create a new order; neither reads nor writes persistence.
+
+### Wave C — Build the complete exercise bank
+
+- Generate one bank per page load with exactly one item for every record, independent of editorial review status.
+- Use four distinct meaning labels per item, one correct and three randomized distractors; randomize both question and option order.
+- Use native radio inputs, lock choices after submission, announce the result, show the correct answer and context, and finish at question 1,000 instead of wrapping.
+- Keep the score and position in memory only; reload and shuffle reset them.
+
+### Wave D — Make Explore one readable document
+
+- Keep only ephemeral search and valid `WordKind` filtering in the URL.
+- Render the complete filtered array in one single-column list; remove page size, page count, Previous, Next, and learner-status controls.
+- Give every card a stable rank anchor and keep the three examples in native `details` disclosures.
+- Remove per-card audio controls from the 1,000-item index to avoid thousands of speech listeners; active cards and exercise feedback retain audio.
+- Use `content-visibility: auto` as a browser rendering hint without virtualizing away the document the user asked to scroll.
+
+### Wave E — Verify and release
+
+- Typecheck, lint, validate the 1,000 contiguous records, test seeded shuffles and unique choices, build production output, snapshot only the three public Pages routes, and assert `/method` is a real 404.
+- Browser-check a landing reveal/next/reload loop, a 1,000-card Explore DOM at desktop and 280px, and an exercise answer/next loop from `1 of 1,000`.
+- Push the verified change to `main` and wait for the GitHub Pages workflow before reporting the live URL.
+
+The remainder of this document is retained as historical audit planning for the earlier persisted-learning direction. It is not the current product contract.
+
+## Historical scheduler-oriented plan
+
+### 1. Executive direction
 
 Preserve the current editorial identity: a quiet paper canvas, dark ink, one primary blue action color, green learning reinforcement, large German words, and restrained borders. Rebuild the experience underneath that visual language around one reliable promise:
 

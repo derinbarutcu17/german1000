@@ -2,18 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ProgressBar } from "./ProgressBar";
 
 const links = [
-  { href: "/", label: "Today", index: "01" },
+  { href: "/", label: "Cards", index: "01" },
   { href: "/explore", label: "Explore", index: "02" },
   { href: "/exercises", label: "Exercises", index: "03" },
-  { href: "/method", label: "Method", index: "04" },
 ];
 
-export function SiteHeader({ knownCount, total }: { knownCount: number; total: number }) {
+export function SiteHeader() {
   const pathname = usePathname();
-  const percentage = total ? Math.round((knownCount / total) * 100) : 0;
   return (
     <header className="topbar">
       <Link className="brand" href="/">
@@ -31,12 +28,7 @@ export function SiteHeader({ knownCount, total }: { knownCount: number; total: n
           );
         })}
       </nav>
-      <div className="top-progress">
-        <span>{knownCount.toLocaleString()}/{total.toLocaleString()}</span>
-        <ProgressBar value={knownCount} max={total} label={knownCount + " of " + total + " words marked known"} compact />
-        <span className="top-progress-percent">{percentage}%</span>
-      </div>
+      <span className="top-note">1,000 forms · no account</span>
     </header>
   );
 }
-

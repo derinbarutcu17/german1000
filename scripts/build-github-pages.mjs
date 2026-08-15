@@ -10,7 +10,7 @@ const outputDirectory = path.join(projectRoot, "pages-dist");
 const basePath = normalizeBasePath(process.env.GITHUB_PAGES_BASE_PATH ?? "/german1000-design-audit");
 const port = process.env.PAGES_PORT ?? "4173";
 const origin = `http://127.0.0.1:${port}`;
-const routes = ["/", "/explore/", "/exercises/", "/method/"];
+const routes = ["/", "/explore/", "/exercises/"];
 
 function normalizeBasePath(value) {
   const trimmed = value.trim();

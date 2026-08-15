@@ -1,21 +1,8 @@
-"use client";
-
-import { useState } from "react";
-
-export function Footer({ onReset }: { onReset: () => void }) {
-  const [confirming, setConfirming] = useState(false);
+export function Footer() {
   return (
     <footer className="footer">
-      <span>German 1000 · built for returning, not cramming.</span>
-      {!confirming ? (
-        <button type="button" onClick={() => setConfirming(true)}>Reset local progress</button>
-      ) : (
-        <div className="reset-confirmation" role="group" aria-label="Confirm reset">
-          <span>This clears saved review states on this browser.</span>
-          <button type="button" className="button button-subtle" autoFocus onClick={() => setConfirming(false)}>Keep progress</button>
-          <button type="button" className="button button-danger" onClick={() => { onReset(); setConfirming(false); }}>Clear progress</button>
-        </div>
-      )}
+      <span>German 1000 · shuffle a little, stay curious.</span>
+      <span>1,000 ranked forms · no account required</span>
     </footer>
   );
 }

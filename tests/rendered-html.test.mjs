@@ -46,11 +46,14 @@ test("renders every public route and preserves a real 404 boundary", async () =>
     },
   };
 
-  for (const route of ["/", "/explore", "/exercises?mode=meaning", "/exercises?mode=word", "/exercises?mode=article", "/method"]) {
+  for (const route of ["/", "/explore", "/exercises"]) {
     const response = await worker.fetch(new Request("http://localhost" + route, { headers: { accept: "text/html" } }), env, context);
     assert.equal(response.status, 200, route);
     assert.match(await response.text(), /<h1\b/i, route);
   }
+
+  const removedMethod = await worker.fetch(new Request("http://localhost/method", { headers: { accept: "text/html" } }), env, context);
+  assert.equal(removedMethod.status, 404);
 
   const missing = await worker.fetch(new Request("http://localhost/does-not-exist", { headers: { accept: "text/html" } }), env, context);
   assert.equal(missing.status, 404);

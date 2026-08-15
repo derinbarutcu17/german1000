@@ -19,15 +19,29 @@ test("keeps known source gloss hazards corrected in the surfaced records", () =>
   assert.match(byWord.get("gewissen")?.gloss ?? "", /certain/);
 });
 
-for (const mode of ["meaning", "word", "article"] as const) {
-  test("builds a deterministic " + mode + " exercise bank", () => {
-    const bank = buildExerciseBank(records, mode, 12);
-    assert.equal(bank.length, 12);
-    for (const item of bank) {
-      const correct = item.options.filter((option) => option.correct);
-      assert.equal(correct.length, 1);
-      assert.equal(new Set(item.options.map((option) => option.value)).size, item.options.length);
-      assert.ok(item.options.length === (mode === "article" ? 3 : 4));
-    }
-  });
+function seededRandom(seed: number) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x1_0000_0000;
+  };
 }
+
+test("builds a randomized question bank covering every record", () => {
+  const bank = buildExerciseBank(records, records.length, seededRandom(1));
+  assert.equal(bank.length, 1000);
+  assert.deepEqual(new Set(bank.map((item) => item.record.rank)), new Set(records.map((record) => record.rank)));
+
+  for (const item of bank) {
+    assert.equal(item.options.filter((option) => option.correct).length, 1);
+    assert.equal(item.options.length, 4);
+    assert.equal(new Set(item.options.map((option) => option.value)).size, 4);
+    assert.equal(new Set(item.options.map((option) => option.label)).size, 4);
+  }
+
+  const secondBank = buildExerciseBank(records, records.length, seededRandom(2));
+  assert.notDeepEqual(
+    bank.slice(0, 25).map((item) => item.record.rank),
+    secondBank.slice(0, 25).map((item) => item.record.rank),
+  );
+});

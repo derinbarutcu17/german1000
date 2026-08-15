@@ -1,7 +1,7 @@
 import { AudioButton } from "./AudioButton";
 import type { WordRecord } from "../data/records";
 
-export function WordExamples({ record, compact = false }: { record: WordRecord; compact?: boolean }) {
+export function WordExamples({ record, compact = false, withAudio = true }: { record: WordRecord; compact?: boolean; withAudio?: boolean }) {
   const levels = ["Simple", "Everyday", "Complex"];
   return (
     <div className={"examples" + (compact ? " examples-compact" : "")}>
@@ -13,10 +13,9 @@ export function WordExamples({ record, compact = false }: { record: WordRecord; 
             <p className="example-de" lang="de">{example.de}</p>
             <p className="example-en">{example.en}</p>
           </div>
-          <AudioButton word={example.de} compact />
+          {withAudio && <AudioButton word={example.de} compact />}
         </div>
       ))}
     </div>
   );
 }
-
