@@ -20,6 +20,7 @@ The historical browser journeys below are intentionally retained as baseline evi
 | `npm run test:content` | PASS | 1,000 contiguous, unique ranks. |
 | `npm run build` | PASS | Vinext production build and Sites artifact validation completed on macOS without GNU `timeout`. |
 | `npm run build:github-pages` | PASS | Production route snapshots for `/`, `/explore/`, `/exercises/`, and `/method/` completed with project-prefixed assets and a `.nojekyll` marker. |
+| GitHub Pages deployment | PASS | The Pages workflow completed successfully from `main`; live URL: https://derinbarutcu17.github.io/german1000-design-audit/ |
 | Route smoke | PASS | `/`, `/explore`, `/exercises?mode=meaning`, `/exercises?mode=word`, `/exercises?mode=article`, and `/method` return HTML; unknown route returns 404. |
 | Today interaction | PASS | Reveal → I know it advances `#001` to `#002`; reload preserves the same session cursor. |
 | Exercise interaction | PASS | Article radio group exposes native choices and one live correct-feedback result. |

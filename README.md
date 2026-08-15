@@ -4,7 +4,7 @@ This repository contains the German 1000 learning website source plus an evidenc
 
 ## Implementation status
 
-**UI/experience overhaul implemented and prepared for GitHub Pages release.** The original audit findings are preserved as baseline evidence in [`docs/design-audit.md`](docs/design-audit.md); the current source closes the primary interaction, navigation, content, responsive, and accessibility issues identified there.
+**UI/experience overhaul implemented and published on GitHub Pages.** The original audit findings are preserved as baseline evidence in [`docs/design-audit.md`](docs/design-audit.md); the current source closes the primary interaction, navigation, content, responsive, and accessibility issues identified there.
 
 Implemented in this release:
 
@@ -43,6 +43,8 @@ npm run build:github-pages
 ```
 
 The generated `pages-dist/` directory is intentionally ignored because it is a deployment artifact, not source code. Pushes to `main` and the implementation branch trigger the workflow; it can also be started manually from the Actions tab.
+
+Live release: [German 1000 on GitHub Pages](https://derinbarutcu17.github.io/german1000-design-audit/)
 
 ## Audit documents
 
