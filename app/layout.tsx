@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "German 1000 · Frequency-first vocabulary",
   description: "A minimal German vocabulary studio with 1,000 frequency-ranked forms, explanations, examples, and retrieval exercises.",
+  openGraph: {
+    title: "German 1000 · Frequency-first vocabulary",
+    description: "A quiet vocabulary studio for learning high-frequency German through active recall, context, and return visits.",
+    type: "website",
+  },
+  themeColor: "#f6f8f8",
   other: {
     "codex-preview": "development",
   },

@@ -1,10 +1,12 @@
 # German 1000 — UI and experience overhaul implementation plan
 
-**Status:** Ready for implementation
+**Status:** Implemented in the published first-release codebase; final product/content review remains.
 **Target:** Existing German 1000 Next/Vinext application
 **Primary outcome:** Make the site feel like a trustworthy daily language-learning product, not a polished static list with learning features layered on top.
 
 This plan is intentionally implementation-oriented. It converts the audit into a sequence of small, reviewable changes with explicit source files, state contracts, component responsibilities, test gates, and release criteria.
+
+The active design-system summary is [`DESIGN.md`](../DESIGN.md). Post-implementation verification is recorded in [`docs/verification.md`](verification.md).
 
 ## 1. Executive direction
 
