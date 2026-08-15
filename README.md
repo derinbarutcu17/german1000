@@ -19,7 +19,7 @@ npm ci
 npm run dev
 ```
 
-The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), vocabulary data is in [`app/data/records.ts`](app/data/records.ts), and the stateless shuffle utility is in [`app/lib/random.ts`](app/lib/random.ts).
+The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), vocabulary data is in [`app/data/records.ts`](app/data/records.ts), sentence content is in [`app/data/example-content.ts`](app/data/example-content.ts) and [`app/data/tatoeba-examples.json`](app/data/tatoeba-examples.json), and the stateless shuffle utility is in [`app/lib/random.ts`](app/lib/random.ts).
 
 ## GitHub Pages release
 
@@ -47,7 +47,7 @@ npm run build:github-pages
 node --test tests/rendered-html.test.mjs
 ```
 
-The tests cover the contiguous 1,000-record dataset, full randomized exercise-bank coverage, unique answer choices, search/type filtering, public-route rendering, and the removed Method boundary. The detailed release record is in [`docs/verification.md`](docs/verification.md).
+The tests cover the contiguous 1,000-record dataset, 3,000 distinct bilingual sentence examples with exact surface-form usage, full randomized exercise-bank coverage, unique answer choices, search/type filtering, public-route rendering, and the removed Method boundary. The detailed release record is in [`docs/verification.md`](docs/verification.md).
 
 ## Design and audit documentation
 
@@ -59,6 +59,7 @@ The tests cover the contiguous 1,000-record dataset, full randomized exercise-ba
 - [`docs/flow-map.md`](docs/flow-map.md) — current information architecture.
 - [`docs/interaction-state-matrix.md`](docs/interaction-state-matrix.md) — current surface states and acceptance criteria.
 - [`docs/content-audit.md`](docs/content-audit.md) — vocabulary and editorial-risk review.
+- [`docs/content-sources.md`](docs/content-sources.md) — static sentence-source and attribution notes.
 - [`docs/verification.md`](docs/verification.md) — commands, browser journeys, and evidence limits.
 
 The ZIP contained a project README but no `AGENTS.md`, `CLAUDE.md`, or other repository instruction file. The README was treated as project material and source context, not as instructions that override the user’s request.

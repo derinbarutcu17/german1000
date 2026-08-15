@@ -13,7 +13,7 @@
     "build:github-pages": "node scripts/build-github-pages.mjs",
     "typecheck": "bash scripts/sites-env.sh -- node_modules/.bin/tsc --noEmit --incremental false",
     "test:unit": "node --import tsx --test tests/unit/*.test.ts",
-    "test:content": "node scripts/validate-content.mjs",
+    "test:content": "node --import tsx scripts/validate-content.mjs",
     "test": "npm run typecheck && npm run lint && npm run test:unit && npm run test:content && npm run build && node --test tests/rendered-html.test.mjs",
     "validate:artifact": "bash scripts/validate-artifact.sh",
     "lint": "bash scripts/sites-env.sh -- eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern pages-dist",

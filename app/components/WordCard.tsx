@@ -22,9 +22,8 @@ export function WordCard({ record }: { record: WordRecord }) {
       <p className="word-gloss">{record.gloss}</p>
       <p className="word-explanation">{record.explanation}</p>
       {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
-      {record.reviewStatus === "unreviewed" && <p className="content-review-note">Frequency source · explanation pending editorial review</p>}
       <details className="word-details" open={examplesOpen} onToggle={(event) => setExamplesOpen(event.currentTarget.open)}>
-        <summary>See three usage examples <span aria-hidden="true">↓</span></summary>
+        <summary>Examples in context <span aria-hidden="true">↓</span></summary>
         {examplesOpen && <WordExamples record={record} compact withAudio={false} />}
       </details>
     </article>

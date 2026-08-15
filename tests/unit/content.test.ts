@@ -10,6 +10,20 @@ test("surfaces a complete, contiguous vocabulary index", () => {
   assert.ok(records.every((record) => record.word.trim() && record.gloss.trim() && record.examples.length === 3));
 });
 
+test("gives every surface form distinct bilingual sentence examples", () => {
+  const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  for (const record of records) {
+    const exactWord = new RegExp(`(?:^|[^\\p{L}\\p{M}\\p{N}])${escapeRegExp(record.word)}(?=$|[^\\p{L}\\p{M}\\p{N}])`, "iu");
+    assert.equal(new Set(record.examples.map((example) => example.de)).size, 3, record.word);
+    for (const example of record.examples) {
+      assert.ok(example.de.trim() && example.en.trim(), record.word);
+      assert.match(example.de, exactWord, record.word);
+      assert.ok(!/(?:häufiges Wort|hörst oder liest|Prüfe die Funktion|Achte auf den Kontext)/iu.test(example.de + " " + example.en), record.word);
+      assert.match(example.sourceKind, /^(?:tatoeba|context-template)$/u, record.word);
+    }
+  }
+});
+
 test("keeps known source gloss hazards corrected in the surfaced records", () => {
   const byWord = new Map(records.map((record) => [record.word, record]));
   assert.match(byWord.get("schon")?.gloss ?? "", /already|soon/);

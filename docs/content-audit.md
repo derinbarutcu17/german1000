@@ -1,20 +1,22 @@
 # German 1000 — vocabulary and editorial-risk audit
 
-This is a representative content audit based on static inspection of the 1,000-record source and the rendered learning surfaces. It is not a claim that every record is incorrect. The point is that the current data model and generation strategy make errors easy to publish and hard for a learner to detect.
+This document records the content findings that led to the sentence-content overhaul. The original frequency list is still a 1,000-form surface inventory, not a dictionary or sentence corpus. The current release keeps that inventory static and adds a separate bilingual sentence layer so every displayed form is used in three distinct sentences.
 
-## Editorial verdict
+## Current editorial status
 
-The dataset should be treated as **unreviewed learning content** until every visible sense and example has a source or reviewer. Frequency rank is useful for organizing a list, but it does not validate translation, part of speech, inflection, register, example quality, or pedagogical order.
+The release now has a structural content gate: 1,000 records, 3,000 bilingual examples, exact surface-form usage, distinct German sentences, source metadata, and no known placeholder copy. 2,876 examples are linked to static Tatoeba German–English sentence data; 124 are local context templates for ambiguous or poorly covered forms. Frequency rank still does not validate a gloss, part of speech, register, or pedagogical order, so those remain editorial follow-up work.
 
-## Representative high-risk records
+## Representative pre-fix findings
 
-| Rank | Form | Current gloss | Risk | Editorial action |
+The following rows were the visible failure cases before the new sentence layer. They remain useful regression fixtures, not current examples.
+
+| Rank | Form | Former gloss | Former risk | Current treatment |
 | ---: | --- | --- | --- | --- |
-| 77 | `schon` | `beautiful` | Common form is usually “already”; the current gloss is likely a sense/form error without context. | Verify source sense and add a context-rich example. |
-| 103 | `meine` | `think` | Could be confused with `meinen`; inflection and lemma need to be explicit. | Add lemma, part of speech, and correct inflection note. |
-| 137 | `gibt` | `are` | Form is context-dependent and commonly appears in “there is/are” constructions; a single gloss is misleading. | Use a construction note and an example that carries the sense. |
-| 161 | `soll` | `target` | Likely confusion between a modal form and a noun sense. | Verify lemma and sense; do not publish without grammatical metadata. |
-| 994 | `gewissen` | `conscience` | Highly context-dependent inflection/adjective/noun relationship. | Add source context and distinguish the intended lemma/sense. |
+| 77 | `schon` | `beautiful` | The form was shown with generic meta-copy instead of a sentence. | Corrected gloss and three context sentences. |
+| 103 | `meine` | `think` | The form was confused with `meinen` and had no real usage context. | Context sentences now show possessive and verb senses. |
+| 137 | `gibt` | `are` | The form was generated as invalid infinitive copy. | Corrected construction note and `es gibt` examples. |
+| 161 | `soll` | `target` | The modal form was treated as a noun-like item. | Corrected modal examples and sense note. |
+| 994 | `gewissen` | `conscience` | The inflected adjective was misclassified and generated as a verb. | Corrected adjective kind, explanation, and sentence usage. |
 
 These are review flags, not final linguistic judgments. A German editor should confirm the intended corpus context before changing them.
 
@@ -24,17 +26,17 @@ These are review flags, not final linguistic judgments. A German editor should c
 
 The UI presents one primary English gloss for each item. That is acceptable only when the sense is stable and the context supports it. Function words, modal verbs, inflected forms, and common polysemous words need either a short usage note or a sentence that disambiguates them.
 
-### 2. Generated explanations can manufacture confidence
+### 2. Frequency data cannot manufacture context
 
-`app/page.tsx` contains `defaultExamples` and `makeRecord`, which provide generic explanations/examples for many records. Templates are useful for scaffolding, but a generated sentence that merely contains a word is not evidence that the sentence is grammatical, idiomatic, or the right sense.
+The source list tells us which surface forms are frequent. It cannot supply a sentence, translation, sense, or part of speech. Those fields now live in `app/data/example-content.ts` and `app/data/tatoeba-examples.json`, rather than being silently invented by the page component.
 
-### 3. Only a small notes map carries human context
+### 3. Source coverage and local exceptions are explicit
 
-The hand-authored notes map is much smaller than the full dataset. That creates a dangerous visual equivalence: reviewed records and generated records look like the same quality tier.
+Most examples retain a Tatoeba sentence reference. A small local set covers forms that need a controlled construction or were not usable in the export. Both paths are represented by `sourceKind`, and the validator makes missing or placeholder content fail the release check.
 
-### 4. Exercises inherit the same content risk
+### 4. Exercises inherit the same content layer
 
-Meaning and sentence-context exercises draw from the record bank. If a gloss is wrong or underspecified, an exercise can mark a learner wrong for choosing the natural translation. Exercise quality cannot be separated from data QA.
+Meaning exercises draw from the same record bank. If a gloss is wrong or underspecified, an exercise can still be pedagogically weak even when its sentences are valid. Gloss, part-of-speech, and sense review remain the next editorial layer.
 
 ## Recommended record schema
 
@@ -62,14 +64,14 @@ The current UI does not need to show every field. It does need the source model 
 
 ## QA workflow
 
-1. Import the 1,000 records into a review table.
-2. Check duplicate ranks, duplicate surface forms, missing glosses, missing examples, and impossible metadata.
-3. Flag likely form/lemma conflicts (`meine`/`meinen`, modal forms, article/pronoun forms, adjective endings).
+1. Keep `app/words.ts` as the raw 1,000-form inventory.
+2. Keep sentence content in the static editorial/source layer, not in page components.
+3. Validate duplicate ranks, missing glosses, missing bilingual examples, exact surface-form usage, distinct sentences, source references, and placeholder rejection.
 4. Review the highest-frequency 200 records first because they carry the most learning impact.
 5. Review all records used as exercise answers and distractors.
-6. Verify each sentence for grammar, naturalness, translation, and intended sense.
-7. Mark each record with reviewer and date.
-8. Keep generated text as an explicit scaffold state, never as an indistinguishable final state.
+6. Verify each sentence for grammar, naturalness, translation, register, and intended sense.
+7. Add reviewer status and dates when a human linguistic pass is completed.
+8. Keep local context templates explicit; do not silently replace missing content with generic meta-copy.
 
 ## Content-language requirements
 
@@ -81,4 +83,8 @@ The current UI does not need to show every field. It does need the source model 
 
 ## Release gate for data
 
-The site can ship a “reference preview” before all 1,000 records are edited only if the UI clearly labels the data as an in-progress source and does not frame generated explanations as verified lessons. A learning release should require the editorial fields and review status above.
+The static release gate currently requires all 1,000 records to have three distinct bilingual sentences containing the exact form, with no known placeholder language. The site should not add new generated fallback copy without extending the validator and reviewing the resulting content layer.
+
+## Sentence source
+
+The sourced examples are derived from Tatoeba's German–English sentence and link exports. Each sourced example retains a sentence reference in `app/data/tatoeba-examples.json`; repository-level attribution and the local-template boundary are documented in [`docs/content-sources.md`](content-sources.md).

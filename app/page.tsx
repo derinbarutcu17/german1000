@@ -122,7 +122,6 @@ export default function FlashcardsPage() {
               <div className="flashcard-topline">
                 <span>#{String(record.rank).padStart(3, "0")}</span>
                 <span>{record.kind}</span>
-                <span>fresh order</span>
               </div>
 
               {!revealed ? (
@@ -132,7 +131,6 @@ export default function FlashcardsPage() {
                     <h3 id="flashcard-word" ref={wordRef} tabIndex={-1} lang="de">{displayWord(record)}</h3>
                     <AudioButton word={displayWord(record)} />
                   </div>
-                  <p className="flashcard-prompt">What does this word mean, and how might it move through a sentence?</p>
                   <button className="button button-dark flashcard-reveal" type="button" onClick={reveal} aria-controls="flashcard-back" aria-expanded={revealed}>
                     Reveal the back <span aria-hidden="true">↓</span>
                   </button>
@@ -143,7 +141,6 @@ export default function FlashcardsPage() {
                   <h3 className="flashcard-gloss">{record.gloss}</h3>
                   <p className="flashcard-explanation">{record.explanation}</p>
                   {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
-                  {record.reviewStatus === "unreviewed" && <p className="content-review-note">Frequency source · explanation pending editorial review</p>}
                   <WordExamples record={record} />
                   <div className="flashcard-actions">
                     <button className="button button--secondary" type="button" onClick={showFront}>Show the front</button>

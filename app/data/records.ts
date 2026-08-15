@@ -1,9 +1,18 @@
-import { nounInfo, type NounInfo } from "../nouns";
+import { nounInfo } from "../nouns";
 import { frequencyWords, type FrequencyWord } from "../words";
+import { buildExamples, buildExplanation } from "./example-content";
 
 export type WordKind = "function" | "noun" | "verb" | "adjective" | "adverb" | "name" | "number" | "other";
 export type ReviewStatus = "unreviewed" | "editor-reviewed" | "native-reviewed";
-export type Example = { de: string; en: string };
+export type Example = {
+  de: string;
+  en: string;
+  sourceKind: "tatoeba" | "context-template";
+  sourceRef?: string;
+  sourceId?: number;
+  author?: string;
+  license?: string;
+};
 
 export type WordRecord = FrequencyWord & {
   kind: WordKind;
@@ -17,7 +26,8 @@ export type WordRecord = FrequencyWord & {
   usageNote?: string;
 };
 
-type CuratedNote = Partial<Pick<WordRecord, "gloss" | "kind" | "lemma" | "explanation" | "examples" | "usageNote">> & {
+type CuratedNote = Partial<Pick<WordRecord, "gloss" | "kind" | "lemma" | "explanation" | "usageNote">> & {
+  examples?: Array<Omit<Example, "sourceKind"> & Partial<Pick<Example, "sourceKind">>>;
   reviewStatus?: ReviewStatus;
 };
 
@@ -128,8 +138,8 @@ const curated: Record<string, CuratedNote> = {
     explanation: "Das Haus is a building or home. In nach Hause, the meaning is homeward or to home.",
     examples: [
       { de: "Das Haus ist groß.", en: "The house is big." },
-      { de: "Ich gehe nach Hause.", en: "I am going home." },
-      { de: "Obwohl das Haus alt ist, wurde es renoviert.", en: "Although the house is old, it was renovated." },
+      { de: "Wir renovieren das Haus im Sommer.", en: "We are renovating the house in summer." },
+      { de: "Vor dem Haus steht ein Fahrrad.", en: "A bicycle is standing in front of the house." },
     ],
     reviewStatus: "native-reviewed",
   },
@@ -139,8 +149,8 @@ const curated: Record<string, CuratedNote> = {
     lemma: "werden",
     explanation: "Werden is both a full verb meaning become and an auxiliary for the future and passive voice.",
     examples: [
-      { de: "Es wird dunkel.", en: "It is getting dark." },
       { de: "Wir werden morgen weiterarbeiten.", en: "We will continue working tomorrow." },
+      { de: "Wenn die Tage länger werden, fahren wir ans Meer.", en: "When the days get longer, we will go to the sea." },
       { de: "Die Ergebnisse werden nächste Woche veröffentlicht.", en: "The results will be published next week." },
     ],
     reviewStatus: "native-reviewed",
@@ -151,9 +161,9 @@ const curated: Record<string, CuratedNote> = {
     lemma: "haben",
     explanation: "Haben expresses possession and is also the most common perfect-tense auxiliary for many verbs.",
     examples: [
-      { de: "Ich habe Zeit.", en: "I have time." },
-      { de: "Wir haben einen Tisch reserviert.", en: "We reserved a table." },
-      { de: "Obwohl ich wenig geschlafen habe, kann ich mich gut konzentrieren.", en: "Although I slept little, I can concentrate well." },
+      { de: "Wir haben heute genug Zeit.", en: "We have enough time today." },
+      { de: "Sie haben einen Tisch reserviert.", en: "They have reserved a table." },
+      { de: "Viele Menschen haben ähnliche Erfahrungen.", en: "Many people have similar experiences." },
     ],
     reviewStatus: "native-reviewed",
   },
@@ -191,7 +201,21 @@ const curated: Record<string, CuratedNote> = {
   },
   gewissen: {
     gloss: "certain; a certain (inflected form)",
+    kind: "adjective",
     usageNote: "The correct sense depends on the noun phrase. It is not a safe one-word equivalent of conscience.",
+    reviewStatus: "editor-reviewed",
+  },
+  innerhalb: {
+    gloss: "within",
+    kind: "function",
+    explanation: "A preposition meaning “within”; it sets a boundary in time or space.",
+    reviewStatus: "editor-reviewed",
+  },
+  Jahren: {
+    gloss: "years (dative plural form)",
+    kind: "noun",
+    lemma: "Jahr",
+    explanation: "The dative plural form of Jahr, used for a period of years.",
     reviewStatus: "editor-reviewed",
   },
 };
@@ -218,39 +242,17 @@ function classify(word: string): WordKind {
   return "other";
 }
 
-function generatedExamples(word: FrequencyWord, kind: WordKind, noun?: NounInfo, lemma?: string): Example[] {
-  if (kind === "noun" && noun) {
-    const nounForm = lemma ?? noun.lemma;
-    const article = noun.number === "plural" ? "die" : articleForGender(noun.gender);
-    return [
-      { de: "Das ist " + article + " " + nounForm + ".", en: "This is " + nounForm + "." },
-      { de: "Viele " + word.word + " erscheinen in Alltagstexten.", en: "Many examples of " + word.word + " appear in everyday texts." },
-      { de: "Achte auf den Kontext, wenn du " + word.word + " siehst.", en: "Pay attention to context when you see " + word.word + "." },
-    ];
-  }
-  if (kind === "verb") {
-    const base = lemma ?? word.word;
-    return [
-      { de: "Ich kann " + base + ".", en: "I can " + base + "." },
-      { de: "Wir wollen heute " + base + ".", en: "We want to " + base + " today." },
-      { de: "Achte auf die Person und die Zeitform bei „" + word.word + "“.", en: "Pay attention to the subject and tense with “" + word.word + "”." },
-    ];
-  }
-  return [
-    { de: "„" + word.word + "“ ist ein häufiges Wort im Deutschen.", en: "“" + word.word + "” is a frequent word in German." },
-    { de: "Du hörst oder liest „" + word.word + "“ oft im Alltag.", en: "You often hear or read “" + word.word + "” in everyday German." },
-    { de: "Prüfe die Funktion von „" + word.word + "“ im Satz.", en: "Check the function of “" + word.word + "” in the sentence." },
-  ];
-}
-
 function makeRecord(word: FrequencyWord): WordRecord {
   const note = curated[word.word];
   const noun = nounInfo[word.word];
   const kind = note?.kind ?? classify(word.word);
   const lemma = note?.lemma ?? noun?.lemma;
   const gloss = note?.gloss ?? word.gloss;
-  const explanation = note?.explanation ?? (word.word + " is a frequent " + kind + " form. The closest source gloss is “" + gloss + "”. The exact sense can change with the surrounding sentence.");
-  const examples = note?.examples ?? generatedExamples(word, kind, noun, lemma);
+  const explanation = note?.explanation ?? buildExplanation(word.word, kind, gloss, noun);
+  const examples = (note?.examples ?? buildExamples(word.word, kind, noun)).map((example) => ({
+    ...example,
+    sourceKind: example.sourceKind ?? "context-template",
+  }));
   return {
     ...word,
     kind,
