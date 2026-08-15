@@ -3,6 +3,7 @@
 import { AppShell } from "../components/AppShell";
 import { Footer } from "../components/Footer";
 import { useLearningStore } from "../lib/learning/useLearningStore";
+import Link from "next/link";
 
 export default function MethodPage() {
   const store = useLearningStore();
@@ -36,14 +37,14 @@ export default function MethodPage() {
             <p className="eyebrow">03 / Context</p>
             <h2 id="context-title">Frequency is the map; context is the destination.</h2>
             <p>Translations are starting points. Example sentences and notes show how a word behaves, so you can notice register, grammar, and the small meanings that dictionaries compress.</p>
-            <a className="text-link" href="/explore">Explore the full word index →</a>
+            <Link className="text-link" href="/explore">Explore the full word index →</Link>
           </section>
 
           <section className="method-section" aria-labelledby="boundaries-title">
             <p className="eyebrow">04 / Boundaries</p>
             <h2 id="boundaries-title">Practice stays separate from progress.</h2>
             <p>Exercises are for retrieval practice. They show immediate feedback but do not silently alter your review schedule. The daily review actions are the single source of truth for learning progress.</p>
-            <a className="text-link" href="/exercises">Try an exercise →</a>
+            <Link className="text-link" href="/exercises">Try an exercise →</Link>
           </section>
         </div>
 

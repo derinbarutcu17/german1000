@@ -48,7 +48,7 @@ export default function ExercisesPage() {
   const isCorrect = Boolean(selectedOption?.correct);
 
   function chooseMode(nextMode: ExerciseMode) {
-    window.history.pushState(null, "", "/exercises?mode=" + nextMode);
+    window.history.pushState(null, "", window.location.pathname + "?mode=" + nextMode);
     setMode(nextMode);
     setIndex(0);
     setSelected(null);

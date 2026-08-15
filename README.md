@@ -4,7 +4,7 @@ This repository contains the German 1000 learning website source plus an evidenc
 
 ## Implementation status
 
-**UI/experience overhaul implemented locally and published for review.** The original audit findings are preserved as baseline evidence in [`docs/design-audit.md`](docs/design-audit.md); the current source closes the primary interaction, navigation, content, responsive, and accessibility issues identified there.
+**UI/experience overhaul implemented and prepared for GitHub Pages release.** The original audit findings are preserved as baseline evidence in [`docs/design-audit.md`](docs/design-audit.md); the current source closes the primary interaction, navigation, content, responsive, and accessibility issues identified there.
 
 Implemented in this release:
 
@@ -15,7 +15,7 @@ Implemented in this release:
 - Shared tokens/components, semantic progress bars, focus handoffs, skip link, reduced-motion and forced-colors paths, 280px-safe responsive layout, and reset confirmation.
 - Worker typings and portable build behavior for macOS/Linux environments.
 
-The repo is ready for a final product/content review and deployment decision; a full VoiceOver certification and real-device speech matrix remain deliberate follow-up checks.
+The repo is ready for a final product/content review; a full VoiceOver certification and real-device speech matrix remain deliberate follow-up checks.
 
 ## Start the site locally
 
@@ -26,11 +26,23 @@ npm ci
 npm run dev
 ```
 
-The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), and vocabulary data is in [`app/words.ts`](app/words.ts).
+The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), and vocabulary data is in [`app/data/records.ts`](app/data/records.ts).
 
 The active design source of truth is [`DESIGN.md`](DESIGN.md). The learning rules live under [`app/lib/learning`](app/lib/learning).
 
 The original project notes are preserved in [`docs/original-project-readme.md`](docs/original-project-readme.md). The public audit copy redacts the source archive’s deployment project identifier from `.openai/hosting.json`; configure your own hosting project before deployment.
+
+## GitHub Pages release
+
+The repository includes a Pages workflow at [`.github/workflows/pages.yml`](.github/workflows/pages.yml). It builds the production app, snapshots the interactive routes into a static project-site artifact, and deploys that artifact through GitHub Pages.
+
+To reproduce the release artifact locally:
+
+```bash
+npm run build:github-pages
+```
+
+The generated `pages-dist/` directory is intentionally ignored because it is a deployment artifact, not source code. Pushes to `main` and the implementation branch trigger the workflow; it can also be started manually from the Actions tab.
 
 ## Audit documents
 
@@ -49,9 +61,10 @@ The original project notes are preserved in [`docs/original-project-readme.md`](
 
 - `npm run typecheck` — passed with Cloudflare worker types included.
 - `npm run lint` — passed.
-- `npm run test:unit` — passed, 22 tests covering scheduler, sessions, migration, storage, content, and exercise banks.
+- `npm run test:unit` — passed, 25 tests covering scheduler, sessions, migration, storage, content, and exercise banks.
 - `npm run test:content` — passed for 1,000 contiguous ranked forms.
 - `npm run build` — passed; Sites artifact validation passed.
+- `npm run build:github-pages` — passed; all four public routes were snapshotted with project-prefixed assets.
 - `node --test tests/rendered-html.test.mjs` — passed.
 - Manual browser verification — passed for Today reveal/review/reload continuity, all four routes, query-driven exercises, Explore search/filtering, one-result bounded rendering, and accessible radio feedback. The verification record is in [`docs/verification.md`](docs/verification.md).
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { AppShell } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
 import { Footer } from "../components/Footer";
@@ -39,7 +40,8 @@ export default function ExplorePage() {
       page: patch.q !== undefined || patch.status !== undefined || patch.type !== undefined ? 1 : query.page,
     };
     const params = buildExploreParams(next);
-    const nextUrl = params.toString() ? "/explore?" + params.toString() : "/explore";
+    const currentPath = window.location.pathname;
+    const nextUrl = params.toString() ? currentPath + "?" + params.toString() : currentPath;
     window.history.replaceState(null, "", nextUrl);
     setQuery(next);
   }
@@ -65,7 +67,7 @@ export default function ExplorePage() {
               <h2 id="filters-title">Find a word</h2>
               <p>Use the search and filters together. Your position is preserved as you move around.</p>
             </div>
-            <a className="text-link" href="/explore">Clear filters</a>
+            <Link className="text-link" href="/explore">Clear filters</Link>
           </div>
           <div className="filter-grid">
             <label className="field field--search">
@@ -147,7 +149,7 @@ export default function ExplorePage() {
           <EmptyState
             title="Nothing matches those filters"
             body="Try a broader search, switch the progress filter back to all words, or clear the filters to return to the index."
-            action={<a className="button button--primary" href="/explore">Show all words</a>}
+            action={<Link className="button button--primary" href="/explore">Show all words</Link>}
           />
         )}
       </main>
