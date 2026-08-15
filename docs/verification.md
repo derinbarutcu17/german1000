@@ -19,6 +19,7 @@
 | `npm run build` | PASS | Vinext production build and Sites artifact validation completed. |
 | `npm run build:github-pages` | PASS | Static snapshots created for `/`, `/explore/`, and `/exercises/`; no Method snapshot is produced. |
 | `node --test tests/rendered-html.test.mjs` | PASS | Three public routes render HTML; `/method` and an unknown route return 404. |
+| GitHub Pages deployment | PASS | Run `31896601057` completed successfully from `main` at commit `faf3534`. |
 | Browser console | PASS | No error-level messages during the local Cards, Explore, or Exercises checks. |
 
 ## Browser journeys
@@ -71,4 +72,4 @@ This record does not certify:
 - production CDN performance under a large number of concurrent visitors;
 - dark mode, which the current site does not implement.
 
-The implementation was reviewed against the local accessibility and design guidance available in the workspace. The next release gate is the GitHub Pages workflow from `main`, followed by a short live smoke check of the same three routes.
+The implementation was reviewed against the local accessibility and design guidance available in the workspace. The `main` Pages workflow and live smoke check completed successfully: the public Cards, Explore, and Exercises routes reflect the stateless release, while `/method/` returns 404.
