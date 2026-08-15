@@ -19,7 +19,7 @@
 | `npm run build` | PASS | Vinext production build and Sites artifact validation completed. |
 | `npm run build:github-pages` | PASS | Static snapshots created for `/`, `/explore/`, and `/exercises/`; no Method snapshot is produced. |
 | `node --test tests/rendered-html.test.mjs` | PASS | Three public routes render HTML; `/method` and an unknown route return 404. |
-| GitHub Pages deployment | PASS | Run `31896601057` completed successfully from `main` at commit `faf3534`. |
+| GitHub Pages deployment | PASS | Run `31896773452` completed successfully from `main` at commit `4b189e5`. |
 | Browser console | PASS | No error-level messages during the local Cards, Explore, or Exercises checks. |
 
 ## Browser journeys
