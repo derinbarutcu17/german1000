@@ -33,6 +33,7 @@ The original project notes are preserved in [`docs/original-project-readme.md`](
 
 - [`docs/design-audit.md`](docs/design-audit.md) — executive assessment, scored lenses, detailed findings, evidence, and limitations.
 - [`docs/priority-backlog.md`](docs/priority-backlog.md) — ordered fix backlog with acceptance criteria.
+- [`docs/ui-overhaul-implementation-plan.md`](docs/ui-overhaul-implementation-plan.md) — detailed architecture, milestones, file map, state contracts, test plan, and release gates for the UI/experience overhaul.
 - [`docs/design-system-proposal.md`](docs/design-system-proposal.md) — proposed tokens, primitives, states, responsive rules, and motion guidance.
 - [`docs/interaction-state-matrix.md`](docs/interaction-state-matrix.md) — surface-by-surface state and behavior inventory.
 - [`docs/content-audit.md`](docs/content-audit.md) — vocabulary and editorial-risk review.
