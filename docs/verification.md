@@ -8,7 +8,26 @@
 - Browser widths exercised: 1440px, 375px, and 280px.
 - The local dev server was tested on both a fresh origin and a returning origin to separate first-visit behavior from persisted state.
 
-## Build and static checks
+## Post-overhaul verification
+
+The historical browser journeys below are intentionally retained as baseline evidence from before implementation. The current implementation was rechecked after the overhaul.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `npm run typecheck` | PASS | Full app, Worker, and D1 type surface checked with `@cloudflare/workers-types`. |
+| `npm run lint` | PASS | Zero ESLint errors or warnings. |
+| `npm run test:unit` | PASS | 25 tests: scheduler, frozen sessions, migration, storage, content, and exercise banks. |
+| `npm run test:content` | PASS | 1,000 contiguous, unique ranks. |
+| `npm run build` | PASS | Vinext production build and Sites artifact validation completed on macOS without GNU `timeout`. |
+| `npm run build:github-pages` | PASS | Production route snapshots for `/`, `/explore/`, `/exercises/`, and `/method/` completed with project-prefixed assets and a `.nojekyll` marker. |
+| Route smoke | PASS | `/`, `/explore`, `/exercises?mode=meaning`, `/exercises?mode=word`, `/exercises?mode=article`, and `/method` return HTML; unknown route returns 404. |
+| Today interaction | PASS | Reveal → I know it advances `#001` to `#002`; reload preserves the same session cursor. |
+| Exercise interaction | PASS | Article radio group exposes native choices and one live correct-feedback result. |
+| Explore interaction | PASS | Search/filter query state renders one matching card and stays within the viewport at the active desktop width. |
+
+Manual browser screenshots were captured for the rebuilt Today, Explore, and Exercises surfaces during this verification pass. A full VoiceOver certification, exact six-width viewport matrix, and real-device speech matrix remain follow-up release checks rather than being represented as passed here.
+
+## Historical baseline build and static checks
 
 | Check | Result | Notes |
 | --- | --- | --- |
