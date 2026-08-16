@@ -1,6 +1,6 @@
-# German 1000
+# German1000
 
-German 1000 is a stateless, frequency-first German vocabulary environment. Open it, wander through a shuffled deck, test a meaning, or scroll the complete index. There is no account, database, saved score, daily queue, or progress reset to manage.
+German1000 is a stateless, frequency-first German vocabulary environment. Open it, wander through a shuffled deck, test a meaning, or scroll the complete index. There is no account, database, saved score, daily queue, or progress reset to manage.
 
 ## What is live
 
@@ -33,7 +33,7 @@ npm run build:github-pages
 
 The generated `pages-dist/` directory is intentionally ignored because it is a deployment artifact. Pushes to `main` trigger the workflow; it can also be started manually from the Actions tab.
 
-Live release: [German 1000 on GitHub Pages](https://derinbarutcu17.github.io/german1000-design-audit/)
+Live release: [German1000 on GitHub Pages](https://derinbarutcu17.github.io/german1000/)
 
 ## Validation
 

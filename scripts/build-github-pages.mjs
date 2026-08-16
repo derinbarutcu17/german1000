@@ -7,7 +7,7 @@ const projectRoot = path.resolve(import.meta.dirname, "..");
 const vinext = path.join(projectRoot, "node_modules", ".bin", "vinext");
 const clientDirectory = path.join(projectRoot, "dist", "client");
 const outputDirectory = path.join(projectRoot, "pages-dist");
-const basePath = normalizeBasePath(process.env.GITHUB_PAGES_BASE_PATH ?? "/german1000-design-audit");
+const basePath = normalizeBasePath(process.env.GITHUB_PAGES_BASE_PATH ?? "/german1000");
 const port = process.env.PAGES_PORT ?? "4173";
 const origin = `http://127.0.0.1:${port}`;
 const routes = ["/", "/explore/", "/exercises/"];
@@ -121,7 +121,7 @@ async function snapshotRoute(route) {
 
 async function main() {
   if (!process.env.GITHUB_PAGES_BASE_PATH) {
-    process.env.GITHUB_PAGES_BASE_PATH = "/german1000-design-audit";
+    process.env.GITHUB_PAGES_BASE_PATH = "/german1000";
   }
 
   await run(vinext, ["build"], {

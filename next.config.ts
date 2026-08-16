@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const isGithubPages = process.env.GITHUB_PAGES === "1";
 const isGithubPagesExport = process.env.GITHUB_PAGES_EXPORT === "1";
-const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH ?? "/german1000-design-audit";
+const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH ?? "/german1000";
 
 const nextConfig: NextConfig = {
   output: isGithubPagesExport ? "export" : undefined,
