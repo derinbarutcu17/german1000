@@ -109,8 +109,8 @@ async function snapshotRoute(route) {
   }
 
   const html = prefixRootAssets(await response.text());
-  if (!html.includes("German 1000")) {
-    throw new Error(`Snapshot for ${route} did not contain the German 1000 document.`);
+  if (!html.includes("German1000")) {
+    throw new Error(`Snapshot for ${route} did not contain the German1000 document.`);
   }
 
   const target = outputPathForRoute(route);
