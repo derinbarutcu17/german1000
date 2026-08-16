@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/", label: "Cards", index: "01" },
-  { href: "/explore", label: "Explore", index: "02" },
-  { href: "/exercises", label: "Exercises", index: "03" },
+  { href: "/", label: "Cards" },
+  { href: "/explore", label: "Explore" },
+  { href: "/exercises", label: "Exercises" },
 ];
 
 export function SiteHeader() {
@@ -21,7 +21,6 @@ export function SiteHeader() {
           const active = pathname === link.href;
           return (
             <Link key={link.href} href={link.href} className={active ? "active" : undefined} aria-current={active ? "page" : undefined}>
-              <span className="nav-index">{link.index}</span>
               <span>{link.label}</span>
             </Link>
           );

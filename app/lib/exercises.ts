@@ -9,7 +9,6 @@ export type ExerciseOption = {
 
 export type ExerciseItem = {
   record: WordRecord;
-  promptLabel: string;
   prompt: string;
   instruction: string;
   answer: string;
@@ -51,7 +50,6 @@ export function buildExerciseBank(records: readonly WordRecord[], limit = record
 
   return selected.map((record) => ({
     record,
-    promptLabel: "German word",
     prompt: displayWord(record),
     instruction: "Choose the closest meaning.",
     answer: firstMeaning(record.gloss),

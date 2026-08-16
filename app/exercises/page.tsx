@@ -24,6 +24,7 @@ export default function ExercisesPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
   const [announcement, setAnnouncement] = useState("");
   const questionTitleRef = useRef<HTMLHeadingElement>(null);
   const completeTitleRef = useRef<HTMLHeadingElement>(null);
@@ -43,6 +44,7 @@ export default function ExercisesPage() {
     setSelected(null);
     setSubmitted(false);
     setCorrectCount(0);
+    setWrongCount(0);
     setAnnouncement("A new order of all 1,000 questions is ready.");
     window.setTimeout(() => focusElement(questionTitleRef.current), 0);
   }
@@ -51,6 +53,7 @@ export default function ExercisesPage() {
     if (!selected || submitted || !item) return;
     setSubmitted(true);
     if (isCorrect) setCorrectCount((count) => count + 1);
+    else setWrongCount((count) => count + 1);
   }
 
   function nextQuestion() {
@@ -76,13 +79,17 @@ export default function ExercisesPage() {
         <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
         <section className="section-heading" aria-labelledby="exercise-title">
           <div>
-            <p className="eyebrow">Random retrieval</p>
             <h1 id="exercise-title">Exercises</h1>
-            <p className="lede">One meaning exercise, shuffled across all 1,000 words. There is no daily limit, saved score, or hidden schedule.</p>
           </div>
-          <div className="score-card" aria-label="Exercise score">
-            <span className="score-card__number">{correctCount}</span>
-            <span className="score-card__label">correct this round</span>
+          <div className="score-card" aria-label={`Round score: ${correctCount} correct, ${wrongCount} wrong`}>
+            <div className="score-card__item score-card__item--correct">
+              <span className="score-card__number">{correctCount}</span>
+              <span className="score-card__label">Correct</span>
+            </div>
+            <div className="score-card__item score-card__item--wrong">
+              <span className="score-card__number">{wrongCount}</span>
+              <span className="score-card__label">Wrong</span>
+            </div>
           </div>
         </section>
 
@@ -96,7 +103,7 @@ export default function ExercisesPage() {
           <section className="empty-state exercise-complete" aria-labelledby="exercise-complete-title">
             <p className="eyebrow">ROUND COMPLETE</p>
             <h2 id="exercise-complete-title" ref={completeTitleRef} tabIndex={-1}>All 1,000 questions answered.</h2>
-            <p>You made it through this temporary question order with {correctCount} correct answers. Reloading or reshuffling starts clean.</p>
+            <p>You made it through this temporary question order with {correctCount} correct and {wrongCount} wrong answers. Reloading or reshuffling starts clean.</p>
             <div className="empty-state-action">
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
               <Link className="button button--secondary" href="/">Return to cards</Link>
@@ -106,12 +113,8 @@ export default function ExercisesPage() {
           <section className="exercise-card" aria-labelledby="question-title">
             <div className="exercise-card__header">
               <span>Question {index + 1} of {bank.length.toLocaleString()}</span>
-              <span>{item.record.kind}</span>
             </div>
             <div className="exercise-prompt">
-              <div className="exercise-prompt__wordline">
-                <p className="eyebrow">{item.promptLabel}</p>
-              </div>
               <h2 id="question-title" ref={questionTitleRef} tabIndex={-1} lang="de">{item.prompt}</h2>
             </div>
             <fieldset className="choice-group">
@@ -157,10 +160,6 @@ export default function ExercisesPage() {
           </section>
         ) : null}
 
-        <aside className="callout" aria-label="How exercises work">
-          <strong>Just open and play.</strong>
-          <p>Every refresh and every shuffle creates a new in-memory order of the full vocabulary. Your answers help this round only; nothing is written to an account or database.</p>
-        </aside>
       </main>
       <Footer />
     </AppShell>
