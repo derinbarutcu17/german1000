@@ -25,7 +25,7 @@ export function buildExploreParams(query: ExploreQuery) {
 }
 
 export function filterRecords(records: readonly WordRecord[], query: ExploreQuery) {
-  const term = query.q.toLowerCase();
+  const term = query.q.trim().toLocaleLowerCase("de-DE").normalize("NFD").replace(/\p{Diacritic}/gu, "");
   return records.filter((record) => {
     const matchesText = !term || searchText(record).includes(term);
     const matchesType = query.type === "all" || record.kind === query.type;

@@ -12,8 +12,17 @@ test("normalizes shareable Explore state and drops invalid values", () => {
 test("intersects search and word-type filters", () => {
   const query = normalizeExploreQuery(new URLSearchParams("q=schon&type=adverb"));
   const matches = filterRecords(records, query);
-  assert.equal(matches.length, 1);
-  assert.equal(matches[0]?.word, "schon");
+  assert.ok(matches.length > 0);
+  assert.ok(matches.some((record) => record.word === "schon"));
+  assert.ok(matches.every((record) => record.kind === "adverb"));
+});
+
+test("searches sentence context and ignores accents", () => {
+  const sentenceMatches = filterRecords(records, normalizeExploreQuery(new URLSearchParams("q=application")));
+  assert.ok(sentenceMatches.some((record) => record.word === "innerhalb"));
+
+  const accentMatches = filterRecords(records, normalizeExploreQuery(new URLSearchParams("q=uber")));
+  assert.ok(accentMatches.some((record) => record.word === "über"));
 });
 
 test("keeps the complete index available without pagination", () => {

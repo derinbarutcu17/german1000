@@ -9,10 +9,6 @@ export function WordCard({ record }: { record: WordRecord }) {
 
   return (
     <article className="word-card word-card--index" id={"word-" + String(record.rank).padStart(3, "0")}>
-      <div className="word-card-topline">
-        <span className="rank">#{String(record.rank).padStart(3, "0")}</span>
-        <span className="band">{record.kind}</span>
-      </div>
       <div className="word-heading-row">
         <div>
           <h3 lang="de">{displayWord(record)}</h3>

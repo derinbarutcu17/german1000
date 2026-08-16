@@ -24,7 +24,7 @@ export default function ExplorePage() {
   }, []);
 
   function updateQuery(patch: Partial<ExploreQuery>) {
-    const next: ExploreQuery = { ...query, ...patch };
+    const next: ExploreQuery = { ...query, ...patch, q: patch.q === undefined ? query.q : patch.q.trim() };
     const params = buildExploreParams(next);
     const currentPath = window.location.pathname;
     const nextUrl = params.toString() ? currentPath + "?" + params.toString() : currentPath;
@@ -36,51 +36,29 @@ export default function ExplorePage() {
     <AppShell>
       <main id="main-content" className="page-stack explore-page">
         <section className="section-heading explore-heading" aria-labelledby="explore-title">
-          <div>
-            <p className="eyebrow">The full index</p>
-            <h1 id="explore-title">Explore all 1,000.</h1>
-            <p className="lede">One long, searchable page for the complete frequency list. Scroll, open a word, and follow whatever catches your eye.</p>
-          </div>
-          <div className="section-heading__meta" aria-label="Explore summary">
-            <span className="meta-number">{filtered.length.toLocaleString()}</span>
-            <span className="meta-label">words in view</span>
-          </div>
+          <h1 id="explore-title">Explore all 1,000.</h1>
         </section>
 
-        <section className="filter-panel" aria-labelledby="filters-title">
-          <div className="filter-panel__topline">
-            <div>
-              <h2 id="filters-title">Find a word</h2>
-              <p>Search and filter this page for the moment. Nothing is saved.</p>
-            </div>
-            <Link className="text-link" href="/explore">Show all 1,000</Link>
-          </div>
-          <div className="filter-grid filter-grid--explore">
+        <section className="filter-panel filter-panel--simple" aria-label="Search the word list">
+          <form className="search-form" role="search" onSubmit={(event) => event.preventDefault()}>
             <label className="field field--search">
-              <span>Search</span>
+              <span>Search all 1,000 words</span>
+              <span className="search-input-wrap">
               <input
                 type="search"
                 value={query.q}
                 onChange={(event) => updateQuery({ q: event.target.value })}
-                placeholder="Try gehen, the, or 42"
+                placeholder="Search a German word, meaning, or sentence"
                 autoComplete="off"
               />
+                {query.q && (
+                  <button className="search-clear" type="button" onClick={() => updateQuery({ q: "" })} aria-label="Clear search">
+                    ×
+                  </button>
+                )}
+              </span>
             </label>
-            <label className="field">
-              <span>Word type</span>
-              <select value={query.type} onChange={(event) => updateQuery({ type: event.target.value as ExploreQuery["type"] })}>
-                <option value="all">All types</option>
-                <option value="function">Function words</option>
-                <option value="noun">Nouns</option>
-                <option value="verb">Verbs</option>
-                <option value="adjective">Adjectives</option>
-                <option value="adverb">Adverbs</option>
-                <option value="name">Names</option>
-                <option value="number">Numbers</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-          </div>
+          </form>
           <p className="sr-only" role="status" aria-live="polite">
             {filtered.length.toLocaleString()} words match the current filters.
           </p>
@@ -89,7 +67,7 @@ export default function ExplorePage() {
         {filtered.length > 0 ? (
           <section className="explore-results" aria-labelledby="results-title">
             <div className="results-toolbar">
-              <h2 id="results-title">The scrollable word list</h2>
+              <h2 id="results-title">The word list</h2>
               <span>{filtered.length.toLocaleString()} {filtered.length === 1 ? "word" : "words"} · one page</span>
             </div>
             <div className="word-index">
@@ -99,9 +77,9 @@ export default function ExplorePage() {
         ) : (
           <EmptyState
             eyebrow="No match"
-            title="Nothing matches those filters."
-            body="Try a broader search or return to the complete 1,000-word list."
-            action={<Link className="button button-dark" href="/explore">Show all 1,000</Link>}
+            title="Nothing matches that search."
+            body="Try another word or clear the search to see the complete list."
+            action={<Link className="button button-dark" href="/explore">Clear search</Link>}
           />
         )}
       </main>

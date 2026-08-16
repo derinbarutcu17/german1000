@@ -14,7 +14,7 @@
 | --- | --- | --- |
 | `npm run typecheck` | PASS | App and Worker type surface checked with strict TypeScript. |
 | `npm run lint` | PASS | Zero ESLint errors or warnings. |
-| `npm run test:unit` | PASS | 8 tests covering the contiguous dataset, exact bilingual sentence examples, seeded randomized 1,000-question bank, unique choices, shuffle integrity, search, type filtering, and full-index behavior. |
+| `npm run test:unit` | PASS | 9 tests covering the contiguous dataset, exact bilingual sentence examples, seeded randomized 1,000-question bank, unique choices, shuffle integrity, sentence-aware search, accent handling, and full-index behavior. |
 | `npm run test:content` | PASS | 1,000 contiguous forms and 3,000 distinct bilingual examples with exact surface-form usage and source metadata. |
 | `npm run build` | PASS | Vinext production build and Sites artifact validation completed. |
 | `npm run build:github-pages` | PASS | Static snapshots created for `/`, `/explore/`, and `/exercises/`; no Method snapshot is produced. |

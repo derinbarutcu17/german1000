@@ -289,7 +289,14 @@ export function firstMeaning(gloss: string) {
 }
 
 export function searchText(record: WordRecord) {
-  return [record.word, record.lemma, record.gloss, record.explanation, record.usageNote].filter(Boolean).join(" ").toLowerCase();
+  return [
+    record.word,
+    record.lemma,
+    record.gloss,
+    record.explanation,
+    record.usageNote,
+    ...record.examples.flatMap((example) => [example.de, example.en]),
+  ].filter(Boolean).join(" ").toLocaleLowerCase("de-DE").normalize("NFD").replace(/\p{Diacritic}/gu, "");
 }
 
 export function clozeSentence(record: WordRecord) {

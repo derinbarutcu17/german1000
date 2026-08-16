@@ -28,9 +28,8 @@ The only state in the product is temporary UI state. The vocabulary records are 
 | State | Behavior | Acceptance |
 | --- | --- | --- |
 | Baseline | Renders all 1,000 records as one continuous single-column list. | 1,000 stable `#word-001` … `#word-1000` anchors; no pagination UI. |
-| Search | Filters the existing list by searchable record text. | Result count updates in a live region; input stays usable at 280px. |
-| Word type | Filters by the actual `WordKind` values in the dataset. | No invalid article/conjunction/pronoun values are offered. |
-| Clear | Returns to the full index. | All 1,000 records are available again; no progress filter remains. |
+| Search | Filters the existing list by German words, meanings, explanations, and bilingual sentence context. | Result count updates in a live region; input stays usable at 280px. |
+| Clear | Returns to the full index. | All 1,000 records are available again; the clear action removes the query from the URL. |
 | Card details | Native `details` reveals three examples. | Keyboard open/close works and examples remain in the document. |
 | Long page | Browser scrolls the complete list; cards use content visibility for rendering help. | No horizontal overflow, clipped copy, or hidden actions. |
 | No results | Dedicated empty state with one reset action. | No blank grid or dead end. |
