@@ -7,6 +7,31 @@ type ExampleSeed = Omit<Example, "sourceKind"> & { sourceKind: "tatoeba" | "cont
 const template = (de: string, en: string): ExampleSeed => ({ de, en, sourceKind: "context-template" });
 
 const specialExamples: Record<string, ExampleSeed[]> = {
+  Abbildung: [
+    template("Abbildung 7 zeigt alle Teile des Motors.", "Figure 7 shows all the parts of the motor."),
+    template("Auf der Abbildung erkennt man drei verschiedene Wege.", "The illustration shows three different routes."),
+    template("Die Abbildung hilft beim Verständnis des Versuchs.", "The diagram helps with understanding the experiment."),
+  ],
+  Blut: [
+    template("Nach dem Unfall verlor er viel Blut und musste sofort versorgt werden.", "After the accident, he lost a lot of blood and had to be treated immediately."),
+    template("Der Arzt untersucht das Blut im Labor.", "The doctor examines the blood in the laboratory."),
+    template("Blut ist für den Körper lebenswichtig.", "Blood is vital for the body."),
+  ],
+  Krieg: [
+    template("Der Krieg dauerte länger als erwartet.", "The war lasted longer than expected."),
+    template("Der Krieg zwang viele Familien, ihre Heimat zu verlassen.", "The war forced many families to leave their home."),
+    template("Sie sprach nur ungern über den Krieg.", "She was reluctant to talk about the war."),
+  ],
+  gleiche: [
+    template("Wir haben die gleiche Idee.", "We have the same idea."),
+    template("Sie trägt heute die gleiche Jacke wie gestern.", "She is wearing the same jacket today as yesterday."),
+    template("Wir wählen die gleiche Richtung und nehmen denselben Weg.", "We choose the same direction and take the same path."),
+  ],
+  gleichen: [
+    template("Die beiden Bilder gleichen einander sehr.", "The two pictures look very much alike."),
+    template("Die Zwillinge gleichen sich trotz ihrer unterschiedlichen Frisuren.", "The twins look alike despite their different hairstyles."),
+    template("In diesem Punkt gleichen sich die beiden Vorschläge.", "The two proposals are alike in this respect."),
+  ],
   innerhalb: [
     template("Innerhalb von zwei Wochen muss der Antrag eingereicht werden.", "The application must be submitted within two weeks."),
     template("Wir bleiben innerhalb der markierten Fläche.", "We are staying inside the marked area."),

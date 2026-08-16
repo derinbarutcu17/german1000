@@ -52,8 +52,11 @@ export default function ExercisesPage() {
   function submitAnswer() {
     if (!selected || submitted || !item) return;
     setSubmitted(true);
-    if (isCorrect) setCorrectCount((count) => count + 1);
-    else setWrongCount((count) => count + 1);
+    const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
+    const nextWrongCount = wrongCount + (isCorrect ? 0 : 1);
+    if (isCorrect) setCorrectCount(nextCorrectCount);
+    else setWrongCount(nextWrongCount);
+    setAnnouncement(`${isCorrect ? "Correct" : "Not quite"}. Score: ${nextCorrectCount} correct, ${nextWrongCount} wrong.`);
   }
 
   function nextQuestion() {
@@ -96,12 +99,10 @@ export default function ExercisesPage() {
         {!bank.length ? (
           <div className="exercise-card exercise-loading" aria-live="polite">
             <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
-            <p className="eyebrow">SHUFFLING 1,000 QUESTIONS</p>
             <h2>Finding a fresh path through the vocabulary.</h2>
           </div>
         ) : complete ? (
           <section className="empty-state exercise-complete" aria-labelledby="exercise-complete-title">
-            <p className="eyebrow">ROUND COMPLETE</p>
             <h2 id="exercise-complete-title" ref={completeTitleRef} tabIndex={-1}>All 1,000 questions answered.</h2>
             <p>You made it through this temporary question order with {correctCount} correct and {wrongCount} wrong answers. Reloading or reshuffling starts clean.</p>
             <div className="empty-state-action">
@@ -149,7 +150,6 @@ export default function ExercisesPage() {
                   {index + 1 >= bank.length ? "Finish round" : "Next question"}
                 </button>
               )}
-              <span className="exercise-position">{index + 1} / {bank.length.toLocaleString()}</span>
             </div>
             {submitted && (
               <div className="exercise-feedback">

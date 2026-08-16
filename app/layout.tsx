@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "German 1000 · Open-and-play vocabulary",
+  title: "German1000 · Open-and-play vocabulary",
   description: "A stateless, whimsical German vocabulary deck with all 1,000 frequency-ranked forms, explanations, examples, and randomized exercises.",
   openGraph: {
-    title: "German 1000 · Open-and-play vocabulary",
+    title: "German1000 · Open-and-play vocabulary",
     description: "Open a fresh shuffle of 1,000 German forms, reveal their context, and keep wandering without an account or saved progress.",
     type: "website",
   },

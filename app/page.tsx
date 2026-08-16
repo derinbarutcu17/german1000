@@ -86,24 +86,21 @@ export default function FlashcardsPage() {
           </div>
         </section>
 
-        <section className="card-studio" id="flashcard" aria-labelledby="flashcard-title">
-          <div className="section-heading">
-            <div>
-              <h2 id="flashcard-title">A new card is waiting.</h2>
-            </div>
+        <section className="card-studio" id="flashcard" aria-label="Flashcards">
+          <div className="card-studio__meta">
             <span className="section-count">{deck.length ? `Card ${String(position + 1).padStart(3, "0")} / ${records.length.toLocaleString()}` : "1,000 cards · shuffling"}</span>
           </div>
 
           {!deck.length ? (
             <div className="flashcard flashcard--loading" aria-live="polite">
               <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
-              <p className="eyebrow">SHUFFLING THE DECK</p>
+              <p className="eyebrow">Shuffling the deck</p>
               <p>Finding a word from the full 1,000.</p>
             </div>
           ) : complete ? (
             <div className="flashcard flashcard--complete" ref={completeRef} tabIndex={-1} aria-live="polite">
               <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
-              <p className="eyebrow">ROUND COMPLETE</p>
+              <p className="eyebrow">Round complete</p>
               <h3>All 1,000 words wandered through.</h3>
               <p>You saw every card in this temporary order. Shuffle again whenever you want a new path through the same vocabulary.</p>
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
@@ -116,7 +113,6 @@ export default function FlashcardsPage() {
 
               {!revealed ? (
                 <div className="flashcard-front">
-                  <p className="eyebrow">GERMAN FORM</p>
                   <div className="flashcard-wordline">
                     <h3 id="flashcard-word" ref={wordRef} tabIndex={-1} lang="de">{displayWord(record)}</h3>
                   </div>
@@ -125,9 +121,8 @@ export default function FlashcardsPage() {
                   </button>
                 </div>
               ) : (
-                <div className="flashcard-back" id="flashcard-back" ref={backRef} tabIndex={-1}>
-                  <p className="eyebrow">MEANING &amp; CONTEXT</p>
-                  <h3 className="flashcard-gloss">{record.gloss}</h3>
+                <div className="flashcard-back" id="flashcard-back" ref={backRef} tabIndex={-1} aria-labelledby="flashcard-back-title">
+                  <h3 className="flashcard-gloss" id="flashcard-back-title">{record.gloss}</h3>
                   <p className="flashcard-explanation">{record.explanation}</p>
                   {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
                   <WordExamples record={record} />
