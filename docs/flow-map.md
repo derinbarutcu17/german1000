@@ -8,7 +8,7 @@ flowchart TD
   Shell --> Explore["/explore — Explore"]
   Shell --> Exercises["/exercises — Exercises"]
   Cards --> LoadDeck["Create shuffled order of all 1,000"]
-  LoadDeck --> Front["German word + audio + reveal"]
+  LoadDeck --> Front["German word + reveal"]
   Front --> Back["Meaning + explanation + 3 examples"]
   Back --> Next["Next random card"]
   Next --> Front

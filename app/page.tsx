@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "./components/AppShell";
-import { AudioButton } from "./components/AudioButton";
 import { Footer } from "./components/Footer";
 import { WordExamples } from "./components/WordExamples";
 import { displayWord, records, type WordRecord } from "./data/records";
@@ -79,26 +78,18 @@ export default function FlashcardsPage() {
         <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
         <section className="hero hero--cards" aria-labelledby="page-title">
           <div className="hero-copy">
-            <p className="eyebrow">RANDOM GERMAN · 1,000 FORMS</p>
             <h1 id="page-title">Open a card. Let the next word surprise you.</h1>
             <p className="hero-deck">A whimsical, context-rich deck for wandering through the most frequent German forms. Reload the page or shuffle whenever you want a fresh order.</p>
             <div className="hero-actions">
-              <a className="button button-dark" href="#flashcard">Meet the word <span aria-hidden="true">↓</span></a>
               <Link className="text-button" href="/explore">See all 1,000 <span aria-hidden="true">↗</span></Link>
-              <span className="audio-note"><span className="audio-dot" aria-hidden="true" />No account. No stored progress.</span>
             </div>
           </div>
-          <aside className="hero-note" aria-label="About the deck">
-            <span className="hero-note-number">1,000</span>
-            <span className="hero-note-label">frequency-ranked forms, available in every session</span>
-          </aside>
         </section>
 
         <section className="card-studio" id="flashcard" aria-labelledby="flashcard-title">
           <div className="section-heading">
             <div>
-              <p className="eyebrow">THE OPEN DECK</p>
-              <h2 id="flashcard-title">One card, then another.</h2>
+              <h2 id="flashcard-title">A new card is waiting.</h2>
             </div>
             <span className="section-count">{deck.length ? `Card ${String(position + 1).padStart(3, "0")} / ${records.length.toLocaleString()}` : "1,000 cards · shuffling"}</span>
           </div>
@@ -121,7 +112,6 @@ export default function FlashcardsPage() {
             <article className={"flashcard" + (revealed ? " flashcard--revealed" : "")} aria-label={displayWord(record)}>
               <div className="flashcard-topline">
                 <span>#{String(record.rank).padStart(3, "0")}</span>
-                <span>{record.kind}</span>
               </div>
 
               {!revealed ? (
@@ -129,7 +119,6 @@ export default function FlashcardsPage() {
                   <p className="eyebrow">GERMAN FORM</p>
                   <div className="flashcard-wordline">
                     <h3 id="flashcard-word" ref={wordRef} tabIndex={-1} lang="de">{displayWord(record)}</h3>
-                    <AudioButton word={displayWord(record)} />
                   </div>
                   <button className="button button-dark flashcard-reveal" type="button" onClick={reveal} aria-controls="flashcard-back" aria-expanded={revealed}>
                     Reveal the back <span aria-hidden="true">↓</span>
@@ -151,10 +140,6 @@ export default function FlashcardsPage() {
             </article>
           )}
 
-          <div className="shuffle-note">
-            <span className="shuffle-note-mark" aria-hidden="true">✳</span>
-            <p><strong>Nothing is being tracked.</strong> This tab holds one shuffled order in memory only. Reload or finish the round to replace it. Use Explore when you want the whole list in rank order.</p>
-          </div>
         </section>
       </main>
       <Footer />

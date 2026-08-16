@@ -27,7 +27,7 @@
 ### Cards — landing flashcard
 
 1. Loaded `/` at the default 1280px viewport.
-2. Verified the “Cards” route, no-account note, shuffled card counter, German front, and audio control.
+2. Verified the “Cards” route, shuffled card counter, German front, and reveal action.
 3. Selected “Reveal the back” and verified the meaning, explanation, and all three sentence examples.
 4. Selected “Next random card” and verified the counter moved from `Card 001 / 1,000` to a fresh second card with the answer hidden.
 5. Reloaded the route and verified it returned to `Card 001 / 1,000` with a new random record in the local run.
@@ -67,7 +67,7 @@ The original audit evidence remains in [`docs/design-audit.md`](design-audit.md)
 This record does not certify:
 
 - complete WCAG conformance or a full VoiceOver certification;
-- real-device speech behavior across every browser;
+- real-device rendering across every browser;
 - complete native-editorial review of every gloss, sentence, and translation;
 - production CDN performance under a large number of concurrent visitors;
 - dark mode, which the current site does not implement.

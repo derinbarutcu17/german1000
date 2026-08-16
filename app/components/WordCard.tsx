@@ -24,7 +24,7 @@ export function WordCard({ record }: { record: WordRecord }) {
       {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
       <details className="word-details" open={examplesOpen} onToggle={(event) => setExamplesOpen(event.currentTarget.open)}>
         <summary>Examples in context <span aria-hidden="true">↓</span></summary>
-        {examplesOpen && <WordExamples record={record} compact withAudio={false} />}
+        {examplesOpen && <WordExamples record={record} compact />}
       </details>
     </article>
   );

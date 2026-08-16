@@ -7,7 +7,7 @@ The only state in the product is temporary UI state. The vocabulary records are 
 | Surface | States | Target behavior | Acceptance |
 | --- | --- | --- | --- |
 | Primary navigation | Current route / inactive route | Real links for Cards, Explore, and Exercises with current-page semantics. | Direct links, refresh, and back/forward work. |
-| Sticky header | Desktop / narrow mobile | Brand, horizontally reachable nav, and a static no-account note; no progress bar. | No clipping at 280px; active link is not color-only. |
+| Sticky header | Desktop / narrow mobile | Brand and horizontally reachable nav; no progress bar or account state. | No clipping at 280px; active link is not color-only. |
 | Focus | Keyboard focus / focus-visible | Skip link, visible outline, logical order, no traps. | Main content and native controls are reachable in order. |
 | Footer | Static | Reassures the user that the list is ranked and no account is required. | No reset or destructive action is present. |
 
@@ -16,13 +16,12 @@ The only state in the product is temporary UI state. The vocabulary records are 
 | State | Behavior | Acceptance |
 | --- | --- | --- |
 | Server-safe loading | Shows a small shuffling state before client-only randomization. | No hydration mismatch; no empty layout jump that hides the primary task. |
-| Front | Shows one German form, rank, kind, audio, and reveal action. | The meaning and examples are not visible before reveal. |
+| Front | Shows one German form, rank, and reveal action. | The meaning and examples are not visible before reveal. |
 | Revealed back | Shows gloss, explanation, usage note when present, and all three examples. | Focus moves to the revealed region; German text has `lang="de"`. |
 | Show front | Hides the answer without changing the deck position. | The same word remains active and can be recalled again. |
 | Next random card | Advances one position in the in-memory Fisher–Yates order and hides the next answer. | No record repeats before all 1,000 records have appeared. |
 | Round complete | Appears after the user advances past card 1,000. | No undefined card or silent wrap; one clear “Shuffle all 1,000 again” action. |
 | Reload | Recreates a new order from the complete static record set. | No local storage, cookie, database, or saved progress read/write. |
-| Audio unavailable | Written word remains available; speech control exposes a clear disabled/unavailable state. | No silent failure and no learning task is blocked. |
 
 ## Explore — one-page index
 
@@ -41,7 +40,7 @@ The only state in the product is temporary UI state. The vocabulary records are 
 | State | Behavior | Acceptance |
 | --- | --- | --- |
 | Loading | Builds one randomized bank containing every record. | Loading is client-only and does not render a fake question. |
-| Question | German word prompt, optional audio, four native radio choices. | Exactly one correct choice; choices have unique labels and values. |
+| Question | German word prompt and four native radio choices. | Exactly one correct choice; choices have unique labels and values. |
 | Unselected | Check action is disabled until one radio is selected. | Native fieldset/legend semantics and visible focus remain intact. |
 | Submitted correct | Locks choices and announces “Correct.” with the correct answer and examples. | Status is announced once; answer does not write to storage. |
 | Submitted wrong | Locks choices and announces “Not quite.” with the correct answer and examples. | Wrong/correct state is not communicated by color alone. |
@@ -53,7 +52,7 @@ The only state in the product is temporary UI state. The vocabulary records are 
 
 | Width | Cards | Explore | Exercises |
 | ---: | --- | --- | --- |
-| 280 | Word and actions wrap; audio stays reachable. | Search stacks; one-column list has no horizontal overflow. | Choices, feedback, and next action remain full-width. |
+| 280 | Word and actions wrap cleanly. | Search stacks; one-column list has no horizontal overflow. | Choices, feedback, and next action remain full-width. |
 | 375 | Hero and card retain generous spacing without clipping. | Rank, form, gloss, and disclosure remain readable. | Prompt and four choices keep a clear reading order. |
 | 768 | Hero note and card controls can share space. | Long index remains one column with comfortable measure. | Question card has balanced prompt and answer measure. |
 | 1440 | Spacious editorial hero and card. | Full page is still a readable index, not a dense grid. | Focused centered exercise with visible temporary count. |

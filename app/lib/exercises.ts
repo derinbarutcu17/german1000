@@ -14,7 +14,6 @@ export type ExerciseItem = {
   instruction: string;
   answer: string;
   options: ExerciseOption[];
-  audio?: string;
 };
 
 function meaningOptions(base: WordRecord, pool: readonly WordRecord[], random: RandomSource): ExerciseOption[] {
@@ -57,6 +56,5 @@ export function buildExerciseBank(records: readonly WordRecord[], limit = record
     instruction: "Choose the closest meaning.",
     answer: firstMeaning(record.gloss),
     options: meaningOptions(record, pool, random),
-    audio: displayWord(record),
   }));
 }

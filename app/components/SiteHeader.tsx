@@ -14,8 +14,7 @@ export function SiteHeader() {
   return (
     <header className="topbar">
       <Link className="brand" href="/">
-        <span className="brand-mark" aria-hidden="true">de</span>
-        <span>GERMAN 1000</span>
+        <span>German1000</span>
       </Link>
       <nav className="topnav" aria-label="Primary navigation">
         {links.map((link) => {
@@ -28,7 +27,6 @@ export function SiteHeader() {
           );
         })}
       </nav>
-      <span className="top-note">1,000 forms · no account</span>
     </header>
   );
 }

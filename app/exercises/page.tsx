@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "../components/AppShell";
-import { AudioButton } from "../components/AudioButton";
 import { FeedbackPanel } from "../components/FeedbackPanel";
 import { Footer } from "../components/Footer";
 import { WordExamples } from "../components/WordExamples";
@@ -112,7 +111,6 @@ export default function ExercisesPage() {
             <div className="exercise-prompt">
               <div className="exercise-prompt__wordline">
                 <p className="eyebrow">{item.promptLabel}</p>
-                {item.audio && <AudioButton text={item.audio} label="Hear this prompt" />}
               </div>
               <h2 id="question-title" ref={questionTitleRef} tabIndex={-1} lang="de">{item.prompt}</h2>
             </div>
