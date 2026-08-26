@@ -1,6 +1,6 @@
 {
   "framework": null,
-  "buildCommand": "npm run build:github-pages",
+  "buildCommand": "GITHUB_PAGES_BASE_PATH=/german1000 npm run build:github-pages && find pages-dist -name '*.html' -exec sed -i 's|/german1000/|/|g' {} + && for r in explore exercises; do cp pages-dist/$r/index.html pages-dist/$r.html; done",
   "outputDirectory": "pages-dist",
   "cleanUrls": true
 }

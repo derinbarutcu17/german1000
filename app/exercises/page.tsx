@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "../components/AppShell";
 import { FeedbackPanel } from "../components/FeedbackPanel";
 import { Footer } from "../components/Footer";
@@ -26,6 +27,7 @@ export default function ExercisesPage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
   const [announcement, setAnnouncement] = useState("");
+  const { trigger } = useWebHaptics();
   const questionTitleRef = useRef<HTMLHeadingElement>(null);
   const completeTitleRef = useRef<HTMLHeadingElement>(null);
   const item = bank[index];
@@ -51,6 +53,7 @@ export default function ExercisesPage() {
 
   function submitAnswer() {
     if (!selected || submitted || !item) return;
+    trigger(isCorrect ? "success" : "error");
     setSubmitted(true);
     const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
     const nextWrongCount = wrongCount + (isCorrect ? 0 : 1);

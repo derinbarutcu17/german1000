@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "./SiteHeader";
+import { BottomNav } from "./BottomNav";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <a className="skip-link" href="#main-content">Skip to main content</a>
       <SiteHeader />
       {children}
+      <BottomNav />
     </div>
   );
 }

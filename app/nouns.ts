@@ -13,6 +13,7 @@ export const nounInfo: Record<string, NounInfo> = {
   "Kopf": { lemma: "Kopf", gender: "m", number: "singular" },
   "Welt": { lemma: "Welt", gender: "f", number: "singular" },
   "Jahre": { lemma: "Jahr", gender: "n", number: "plural" },
+  "Jahren": { lemma: "Jahr", gender: "n", number: "plural" },
   "Blick": { lemma: "Blick", gender: "m", number: "singular" },
   "Mutter": { lemma: "Mutter", gender: "f", number: "singular" },
   "Seite": { lemma: "Seite", gender: "f", number: "singular" },
