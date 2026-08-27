@@ -12,13 +12,13 @@ export function AsciiWaveBackground({ opacity = 0.58 }: { opacity?: number }) {
     let h = 0;
     let dpr = Math.min(window.devicePixelRatio, 1.5);
     const chars = ".:-=+*#%@";
-    const fontSize = 11;
+    const fontSize = window.innerWidth < 680 ? 11 : 14;
     const resize = () => {
       const parent = canvas.parentElement;
       if (!parent) return;
       const rect = parent.getBoundingClientRect();
-      w = rect.width || 1280;
-      h = rect.height || 260;
+      w = rect.width || (window.innerWidth < 680 ? 390 : 1280);
+      h = rect.height || (window.innerWidth < 680 ? 220 : 260);
       dpr = 1;
       if (Math.abs(canvas.width - Math.ceil(w * dpr)) > 2 || Math.abs(canvas.height - Math.ceil(h * dpr)) > 2) {
         canvas.width = Math.ceil(w * dpr);
