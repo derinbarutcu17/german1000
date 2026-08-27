@@ -1,12 +1,11 @@
-import type { ReactNode } from "react";
-
-export function FeedbackPanel({ correct, answer, children }: { correct: boolean; answer: string; children?: ReactNode }) {
-  const message = correct ? "Correct." : "Not quite.";
+export function FeedbackPanel({ correct, answer }: { correct: boolean; answer: string }) {
   return (
     <div className={"feedback " + (correct ? "feedback-good" : "feedback-wrong")}>
-      <p className="feedback-status" role="status" aria-live="polite">{message}</p>
+      <div className="feedback-head">
+        <span className="feedback-icon" aria-hidden="true">{correct ? "✓" : "✕"}</span>
+        <p className="feedback-status" role="status" aria-live="polite">{correct ? "Correct." : "Not quite."}</p>
+      </div>
       <p className="feedback-answer"><strong>Answer:</strong> {answer}</p>
-      {children}
     </div>
   );
 }

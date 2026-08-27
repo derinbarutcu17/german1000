@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "./components/AppShell";
+import { AsciiWaveBackground } from "./components/AsciiWaveBackground";
 import { Footer } from "./components/Footer";
 import { TextReveal } from "./components/TextReveal";
 import { WordExamples } from "./components/WordExamples";
@@ -109,8 +110,11 @@ export default function FlashcardsPage() {
         <p className="sr-only" role="status" aria-live="polite">
           {announcement}
         </p>
-        <section className="hero hero--cards" aria-labelledby="page-title">
-          <div className="hero-copy">
+        <section className="hero hero--cards hero--with-flag relative isolate" aria-labelledby="page-title">
+          <AsciiWaveBackground opacity={0.58} />
+          <div className="hero-top-fade" aria-hidden="true" />
+          <div className="hero-bottom-fade" aria-hidden="true" />
+          <div className="hero-copy relative">
             <h1 id="page-title">
               <TextReveal
                 text="The 1000 words behind everyday German."
@@ -179,6 +183,26 @@ export default function FlashcardsPage() {
             >
               <div className="flashcard-topline">
                 <span>#{String(record.rank).padStart(3, "0")}</span>
+                <button
+                  type="button"
+                  className="skip-button"
+                  aria-label="Skip card"
+                  onClick={nextCard}
+                >
+                  <svg
+                    className="skip-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12h14" />
+                    <path d="m13 6 6 6-6 6" />
+                  </svg>
+                </button>
               </div>
 
               <div className="flashcard-front">
@@ -209,7 +233,7 @@ export default function FlashcardsPage() {
                 <button
                   className="button button-dark flashcard-reveal"
                   type="button"
-                  onClick={reveal}
+                  onClick={() => (revealed ? showFront() : reveal())}
                   aria-controls="flashcard-back"
                   aria-expanded={revealed}
                 >
@@ -240,18 +264,11 @@ export default function FlashcardsPage() {
                   <WordExamples record={record} />
                   <div className="flashcard-actions">
                     <button
-                      className="button button--secondary"
-                      type="button"
-                      onClick={showFront}
-                    >
-                      Show the front
-                    </button>
-                    <button
                       className="button button-dark"
                       type="button"
                       onClick={nextCard}
                     >
-                      Next random card <span aria-hidden="true">↗</span>
+                      Next random card
                     </button>
                   </div>
                 </div>

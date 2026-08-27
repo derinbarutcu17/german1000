@@ -68,7 +68,6 @@ export default function ExplorePage() {
           <section className="explore-results" aria-labelledby="results-title">
             <div className="results-toolbar">
               <h2 id="results-title">The word list</h2>
-              <span>{filtered.length.toLocaleString()} {filtered.length === 1 ? "word" : "words"} · one page</span>
             </div>
             <div className="word-index">
               {filtered.map((record) => <WordCard key={record.rank} record={record} />)}

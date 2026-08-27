@@ -1,11 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { displayWord, type WordRecord } from "../data/records";
 import { WordExamples } from "./WordExamples";
 
 export function WordCard({ record }: { record: WordRecord }) {
   const [examplesOpen, setExamplesOpen] = useState(false);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [contentH, setContentH] = useState(0);
+
+  useLayoutEffect(() => {
+    setContentH(contentRef.current?.offsetHeight ?? 0);
+  }, [examplesOpen, record.rank]);
+
+  useEffect(() => {
+    function measure() {
+      setContentH(contentRef.current?.offsetHeight ?? 0);
+    }
+    const observer = new ResizeObserver(measure);
+    if (contentRef.current) observer.observe(contentRef.current);
+    measure();
+    return () => observer.disconnect();
+  }, [examplesOpen, record.rank]);
 
   return (
     <article className="word-card word-card--index" id={"word-" + String(record.rank).padStart(3, "0")}>
@@ -18,10 +34,27 @@ export function WordCard({ record }: { record: WordRecord }) {
       <p className="word-gloss">{record.gloss}</p>
       <p className="word-explanation">{record.explanation}</p>
       {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
-      <details className="word-details" open={examplesOpen} onToggle={(event) => setExamplesOpen(event.currentTarget.open)}>
-        <summary>Examples in context <span aria-hidden="true">↓</span></summary>
-        {examplesOpen && <WordExamples record={record} compact />}
-      </details>
+      <div className={"word-details" + (examplesOpen ? " word-details--open" : "")}>
+        <button
+          type="button"
+          className="word-details__trigger"
+          aria-expanded={examplesOpen}
+          aria-controls={"word-details-" + String(record.rank).padStart(3, "0")}
+          onClick={() => setExamplesOpen((v) => !v)}
+        >
+          Examples in context <span aria-hidden="true">{examplesOpen ? "↑" : "↓"}</span>
+        </button>
+        <div
+          className="word-details__wrap"
+          id={"word-details-" + String(record.rank).padStart(3, "0")}
+          style={{ height: examplesOpen && contentH ? contentH : 0 }}
+          aria-hidden={!examplesOpen}
+        >
+          <div ref={contentRef} className="word-details__content">
+            <WordExamples record={record} compact />
+          </div>
+        </div>
+      </div>
     </article>
   );
 }
