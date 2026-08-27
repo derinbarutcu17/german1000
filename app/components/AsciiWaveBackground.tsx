@@ -30,29 +30,15 @@ export function AsciiWaveBackground({ opacity = 0.58 }: { opacity?: number }) {
     const ro = new ResizeObserver(resize);
     if (canvas.parentElement) ro.observe(canvas.parentElement);
     let t = 0;
-    let smoothGust = 0.7;
     const draw = () => {
-      t += 0.008;
+      t += 0.012;
       ctx.clearRect(0, 0, w, h);
       const cols = Math.ceil(w / (fontSize * 0.6));
       const rows = Math.ceil(h / fontSize);
-      const windGust =
-        (Math.sin(t * 0.07) * 0.5 +
-          Math.sin(t * 0.13 + 1.7) * 0.3 +
-          Math.sin(t * 0.19 + 0.9) * 0.2 +
-          Math.sin(t * 0.035 + 2.4) * 0.25 +
-          Math.sin(t * 0.21 + 0.6) * 0.18 +
-          Math.sin(t * 0.51 + 1.1) * 0.12 +
-          Math.sin(t * 0.011 + 3.2) * 0.2 +
-          1) / 2;
-      const gustRaw = 0.3 + windGust * 1.1;
-      const burst = Math.max(0, Math.sin(t * 0.18 + 2.7) * 0.5 + Math.sin(t * 0.37 + 0.4) * 0.5);
-      const targetGust = gustRaw * (0.85 + burst * 0.9);
-      smoothGust += (targetGust - smoothGust) * 0.025;
-      const gust = smoothGust;
-      const effectiveT = t * (0.72 + gust * 0.42);
-      const yaw = Math.sin(t * 0.04) * 0.42 + Math.sin(t * 0.09 + 1.3) * 0.12 + Math.sin(t * 0.015 + 2) * 0.1;
-      const waveAngle = 0.18 + Math.sin(t * 0.045) * 0.14 + Math.sin(t * 0.082) * 0.06;
+      const gust = 0.9 + Math.sin(t * 0.05) * 0.07;
+      const effectiveT = t * 0.92;
+      const yaw = 0.14;
+      const waveAngle = 0.22;
       const cosA = Math.cos(waveAngle);
       const sinA = Math.sin(waveAngle);
       const depthPhase = effectiveT * 0.35;
