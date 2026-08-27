@@ -19,23 +19,25 @@ export function AsciiWaveBackground({ opacity = 0.58 }: { opacity?: number }) {
       const rect = parent.getBoundingClientRect();
       w = rect.width || 1280;
       h = rect.height || 260;
-      dpr = Math.min(window.devicePixelRatio, 1.5);
-      canvas.width = Math.ceil(w * dpr);
-      canvas.height = Math.ceil(h * dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
+      dpr = 1;
+      if (Math.abs(canvas.width - Math.ceil(w * dpr)) > 2 || Math.abs(canvas.height - Math.ceil(h * dpr)) > 2) {
+        canvas.width = Math.ceil(w * dpr);
+        canvas.height = Math.ceil(h * dpr);
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+      }
       ctx.font = `${fontSize}px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace`;
       ctx.textBaseline = "top";
     };
     resize();
     const ro = new ResizeObserver(resize);
     if (canvas.parentElement) ro.observe(canvas.parentElement);
-    let t = 0;
+    const start = performance.now();
     const draw = () => {
-      t += 0.012;
+      const t = (performance.now() - start) * 0.0006;
       ctx.clearRect(0, 0, w, h);
       const cols = Math.ceil(w / (fontSize * 0.6));
       const rows = Math.ceil(h / fontSize);
-      const gust = 0.9 + Math.sin(t * 0.05) * 0.07;
+      const gust = 0.92;
       const effectiveT = t * 0.92;
       const yaw = 0.14;
       const waveAngle = 0.22;
@@ -49,11 +51,11 @@ export function AsciiWaveBackground({ opacity = 0.58 }: { opacity?: number }) {
           const nx = nxRaw;
           const rx = nx * cosA - ny * sinA * 0.18;
           const ry = nx * sinA * 0.08 + ny * cosA;
-          const depth1 = Math.sin(rx * 8 - depthPhase) * 0.28 * gust;
-          const depth2 = Math.sin(rx * 16 + ry * 6 - depthPhase * 1.7) * 0.14 * gust;
+          const depth1 = Math.sin(rx * 8 - depthPhase) * 0.12 * gust;
+          const depth2 = Math.sin(rx * 16 + ry * 6 - depthPhase * 1.7) * 0.06 * gust;
           const depth = depth1 + depth2;
-          const perspective = 1 / (1 + depth * 0.58 + yaw * 0.28);
-          const foldY = ny + depth * 0.18 + Math.sin(rx * 4 - effectiveT * 0.3) * 0.03 * gust;
+          const perspective = 1;
+          const foldY = ny + Math.sin(rx * 4) * 0.015;
           let stripeY = foldY;
           let r = 0, g = 0, b = 0, a = opacity;
           const blend = 0.04;
@@ -93,13 +95,12 @@ export function AsciiWaveBackground({ opacity = 0.58 }: { opacity?: number }) {
           ctx.fillText(ch, px, py);
         }
       }
-      if (!document.hidden) raf = requestAnimationFrame(draw);
-      else setTimeout(() => (raf = requestAnimationFrame(draw)), 250);
+      raf = requestAnimationFrame(draw);
     };
     raf = requestAnimationFrame(draw);
     const onVis = () => { if (!document.hidden && !raf) raf = requestAnimationFrame(draw); };
     document.addEventListener("visibilitychange", onVis);
     return () => { cancelAnimationFrame(raf); ro.disconnect(); document.removeEventListener("visibilitychange", onVis); };
   }, [opacity]);
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10" />;
+  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ zIndex: 0 } as any} />;
 }

@@ -110,7 +110,7 @@ export default function FlashcardsPage() {
         <p className="sr-only" role="status" aria-live="polite">
           {announcement}
         </p>
-        <section className="hero hero--cards hero--with-flag relative isolate" aria-labelledby="page-title">
+        <section className="hero hero--cards hero--with-flag relative" aria-labelledby="page-title">
           <AsciiWaveBackground opacity={0.58} />
           <div className="hero-top-fade" aria-hidden="true" />
           <div className="hero-bottom-fade" aria-hidden="true" />
