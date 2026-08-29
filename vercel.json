@@ -10,6 +10,11 @@
       "permanent": true
     },
     {
+      "source": "/german1000/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/german1000/:path*",
       "destination": "/:path*",
       "permanent": true
