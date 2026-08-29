@@ -2,5 +2,17 @@
   "framework": null,
   "buildCommand": "GITHUB_PAGES_BASE_PATH=/german1000 npm run build:github-pages && find pages-dist -name '*.html' -exec sed -i 's|/german1000/|/|g' {} + && for r in explore exercises; do cp pages-dist/$r/index.html pages-dist/$r.html; done",
   "outputDirectory": "pages-dist",
-  "cleanUrls": true
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/german1000",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/german1000/:path*",
+      "destination": "/:path*",
+      "permanent": true
+    }
+  ]
 }
