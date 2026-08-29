@@ -1,7 +1,22 @@
 import { nounInfo } from "../nouns";
 import { frequencyWords, type FrequencyWord } from "../words";
-import { buildExamples, buildExplanation } from "./example-content";
+import { firstMeaning } from "../lib/word-utils";
+import { buildExamples, buildExplanation, fallbackForLevel, isMetaExample } from "./example-content";
+export { displayWord, firstMeaning } from "../lib/word-utils";
 
+function cefrScore(de: string): number {
+  const words = de.trim().split(/\s+/);
+  const wc = words.length;
+  const commas = (de.match(/,/g) || []).length;
+  const subConj = (de.match(/\b(weil|dass|daß|wenn|obwohl|während|bevor|nachdem|falls|sobald|damit|sodass|ob|wobei|indem|als|wie|denn|sondern)\b/gi) || []).length;
+  const genitive = (de.match(/\b(des|eines|einer)\b/g) || []).length;
+  const konjunktiv = (de.match(/\b(würde|würden|könnte|könnten|hätte|hätten|wäre|wären|sei|seien)\b/g) || []).length;
+  const passive = /\b(wird|werden|wurde|worden)\b/.test(de) ? 1 : 0;
+  const longWords = words.filter((w) => w.replace(/[^A-Za-zÄÖÜäöüß]/g, "").length >= 10).length;
+  const avgLen = words.reduce((a, w) => a + w.replace(/[^A-Za-zÄÖÜäöüß]/g, "").length, 0) / wc;
+  const rare = words.filter((w) => /^[A-ZÄÖÜ]/.test(w) && w.length > 9).length;
+  return wc * 0.6 + commas * 2 + subConj * 2.5 + genitive * 2 + konjunktiv * 3 + passive * 2 + longWords * 1.1 + rare * 1.2 + avgLen * 0.3;
+}
 export type WordKind = "function" | "noun" | "verb" | "adjective" | "adverb" | "name" | "number" | "other";
 export type ReviewStatus = "unreviewed" | "editor-reviewed" | "native-reviewed";
 export type Example = {
@@ -12,6 +27,7 @@ export type Example = {
   sourceId?: number;
   author?: string;
   license?: string;
+  level?: "A2" | "B2" | "C1";
 };
 
 export type WordRecord = FrequencyWord & {
@@ -249,7 +265,29 @@ function makeRecord(word: FrequencyWord): WordRecord {
   const lemma = note?.lemma ?? noun?.lemma;
   const gloss = note?.gloss ?? word.gloss;
   const explanation = note?.explanation ?? buildExplanation(word.word, kind, gloss, noun);
-  const examples = (note?.examples ?? buildExamples(word.word, kind, noun)).map((example) => ({
+  const rawExamples = note?.examples ?? buildExamples(word.word, kind, noun);
+  // For curated notes, sort by CEFR score to ensure A2 ≤ B2 ≤ C1, then assign levels
+  let withLevels: Example[];
+  if (note?.examples) {
+    const scored = [...rawExamples].sort((a, b) => cefrScore(a.de) - cefrScore(b.de));
+    withLevels = scored.map((ex, i) => ({
+      ...ex,
+      sourceKind: (ex.sourceKind ?? "context-template") as Example["sourceKind"],
+      level: (ex.level ?? (i === 0 ? "A2" : i === 1 ? "B2" : "C1")) as Example["level"],
+    }));
+    withLevels = withLevels.map((ex) => {
+      const lvl = ex.level as "A2" | "B2" | "C1";
+      if (!isMetaExample(ex)) return ex;
+      return { ...fallbackForLevel(word.word, lvl, kind, noun, withLevels), level: lvl } as Example;
+    });
+    // Re-sort after fallback to keep monotonic
+    withLevels = [...withLevels]
+      .sort((a, b) => cefrScore(a.de) - cefrScore(b.de))
+      .map((ex, i) => ({ ...ex, level: (i === 0 ? "A2" : i === 1 ? "B2" : "C1") as Example["level"] }));
+  } else {
+    withLevels = rawExamples as Example[];
+  }
+  const examples = withLevels.map((example) => ({
     ...example,
     sourceKind: example.sourceKind ?? "context-template",
   }));
@@ -270,22 +308,10 @@ function makeRecord(word: FrequencyWord): WordRecord {
 export const records = frequencyWords.map(makeRecord);
 export const recordByRank = new Map(records.map((record) => [record.rank, record]));
 
-export function displayWord(record: WordRecord) {
-  if (record.kind === "noun" && record.article) {
-    const nounForm = record.nounNumber === "plural" ? record.word : record.lemma ?? record.word;
-    return record.article + " " + nounForm;
-  }
-  return record.word;
-}
-
 export function rankBand(rank: number) {
   if (rank <= 100) return "1–100";
   if (rank <= 500) return "101–500";
   return "501–1,000";
-}
-
-export function firstMeaning(gloss: string) {
-  return gloss.split(/[;,/]/)[0].trim();
 }
 
 export function searchText(record: WordRecord) {

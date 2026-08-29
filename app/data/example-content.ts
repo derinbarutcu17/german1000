@@ -152,6 +152,27 @@ const specialExamples: Record<string, ExampleSeed[]> = {
     template("In wenigen Tagen beginnt der Urlaub.", "The holiday begins in a few days."),
     template("Nur wenigen Menschen ist der Weg bekannt.", "Only a few people know the way."),
   ],
+  // — Relevant, CEFR-tiered overrides (A2 → B2 → C1)
+  tragen: [
+    template("Ich will heute ein blaues Hemd tragen.", "I want to wear a blue shirt today."),
+    template("Wir müssen auf der Wanderung schwere Rucksäcke tragen.", "We have to carry heavy backpacks on the hike."),
+    template("Obwohl sie wenig geschlafen hat, will sie die Verantwortung für das ganze Team tragen.", "Although she has had little sleep, she wants to carry responsibility for the whole team."),
+  ],
+  trägt: [
+    template("Er trägt heute einen Anzug.", "He is wearing a suit today."),
+    template("Sie trägt die Tasche für ihre Freundin.", "She is carrying the bag for her friend."),
+    template("Er trägt maßgeblich zum Erfolg des Projekts bei, auch wenn das kaum jemand sieht.", "He contributes significantly to the project's success, even though hardly anyone notices."),
+  ],
+  trug: [
+    template("Er trug gestern eine Mütze.", "He wore a cap yesterday."),
+    template("Sie trug den Koffer bis zur Tür.", "She carried the suitcase to the door."),
+    template("Er trug die Idee lange mit sich, bevor er sie endlich aussprach.", "He carried the idea with him for a long time before finally voicing it."),
+  ],
+  getragen: [
+    template("Ich habe das Kleid oft getragen.", "I have worn the dress often."),
+    template("Der Tisch wurde von zwei Personen getragen.", "The table was carried by two people."),
+    template("Die Entscheidung wurde von allen Beteiligten gemeinsam getragen.", "The decision was jointly supported by everyone involved."),
+  ],
 };
 
 const prepositionExamples: Record<string, ExampleSeed[]> = {
@@ -262,10 +283,22 @@ function capitalise(value: string) {
 
 function cleanSourceExamples(word: string): ExampleSeed[] {
   const candidates = (tatoebaExamples as Record<string, Example[]>)[word] ?? [];
-  return candidates.filter((example) => {
-    const wordCount = example.de.trim().split(/\s+/u).length;
-    return wordCount >= 3 && hasExactWord(example.de, word) && !/(?:häufiges Wort|hörst oder liest|prüfe die Funktion|Achte auf den Kontext)/iu.test(example.de);
-  }).map((example) => ({ ...example, sourceKind: "tatoeba" }));
+  const obscureRe = /(?:Portier|Koffer|häufiges Wort|hörst oder liest|prüfe die Funktion|Achte auf den Kontext)/iu;
+  const scored = candidates
+    .filter((example) => {
+      const wordCount = example.de.trim().split(/\s+/u).length;
+      return wordCount >= 5 && wordCount <= 26 && hasExactWord(example.de, word) && !obscureRe.test(example.de);
+    })
+    .map((example) => {
+      const wc = example.de.trim().split(/\s+/u).length;
+      const hasRare = /Portier|Trinkgeld|Gepäck|verdienst|verdient/i.test(example.de) ? 5 : 0;
+      const isNominalized = /^[A-ZÄÖÜ]/.test(word) ? 0 : new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`).test(example.de) && /[A-Z]/.test(example.de.charAt(example.de.indexOf(word))) ? 3 : 0;
+      const score = wc + hasRare + isNominalized + (example.de.includes(",") ? 0.5 : 0);
+      return { example, score, wc };
+    })
+    .sort((a, b) => a.score - b.score || a.wc - b.wc)
+    .map(({ example }) => ({ ...example, sourceKind: "tatoeba" as const }));
+  return scored;
 }
 
 function hasExactWord(sentence: string, word: string) {
@@ -391,6 +424,20 @@ function genericExamples(word: string): ExampleSeed[] {
   return [template(`Wir treffen uns ${word} am Bahnhof.`, `We will meet ${word} at the station.`), template(`Sie kommt ${word} nach Hause.`, `She comes home ${word}.`), template(`Der Bus fährt ${word} weiter.`, `The bus continues ${word}.`)];
 }
 
+function cefrScore(de: string): number {
+  const words = de.trim().split(/\s+/);
+  const wc = words.length;
+  const commas = (de.match(/,/g) || []).length;
+  const subConj = (de.match(/\b(weil|dass|daß|wenn|obwohl|während|bevor|nachdem|falls|sobald|damit|sodass|ob|wobei|indem|als|wie|denn|sondern)\b/gi) || []).length;
+  const genitive = (de.match(/\b(des|eines|einer)\b/g) || []).length;
+  const konjunktiv = (de.match(/\b(würde|würden|könnte|könnten|hätte|hätten|wäre|wären|sei|seien)\b/g) || []).length;
+  const passive = /\b(wird|werden|wurde|worden)\b/.test(de) ? 1 : 0;
+  const longWords = words.filter((w) => w.replace(/[^A-Za-zÄÖÜäöüß]/g, "").length >= 10).length;
+  const avgLen = words.reduce((a, w) => a + w.replace(/[^A-Za-zÄÖÜäöüß]/g, "").length, 0) / wc;
+  const rare = words.filter((w) => /^[A-ZÄÖÜ]/.test(w) && w.length > 9).length;
+  return wc * 0.6 + commas * 2 + subConj * 2.5 + genitive * 2 + konjunktiv * 3 + passive * 2 + longWords * 1.1 + rare * 1.2 + avgLen * 0.3;
+}
+
 function roleFor(word: string, kind: WordKind, noun?: NounInfo) {
   if (noun) return "noun";
   if (prepositions.has(word)) return "preposition";
@@ -403,12 +450,9 @@ function roleFor(word: string, kind: WordKind, noun?: NounInfo) {
   return "other";
 }
 
-export function buildExamples(word: string, kind: WordKind, noun?: NounInfo): Example[] {
-  if (specialExamples[word]) return specialExamples[word];
-  const sourced = cleanSourceExamples(word);
-  if (sourced.length >= 3) return sourced.slice(0, 3);
+function generatedExamplesForRole(word: string, kind: WordKind, noun?: NounInfo): ExampleSeed[] {
   const role = roleFor(word, kind, noun);
-  const generated = role === "noun" && noun ? nounExamples(word, noun)
+  return role === "noun" && noun ? nounExamples(word, noun)
     : role === "number" ? numberExamples(word)
       : role === "preposition" ? prepositionExamples[word] ?? genericExamples(word)
         : role === "conjunction" ? conjunctionExamples(word)
@@ -417,9 +461,71 @@ export function buildExamples(word: string, kind: WordKind, noun?: NounInfo): Ex
               : role === "adjective" ? adjectiveExamples(word)
                 : role === "verb" ? verbExamples(word)
                   : genericExamples(word);
+}
+
+export function isMetaExample(example: Pick<Example, "de" | "en">) {
+  return /\b(?:das Wort|the word)\s+["“][^"”]+["”]/iu.test(`${example.de} ${example.en}`);
+}
+
+export function fallbackForLevel(
+  word: string,
+  level: "A2" | "B2" | "C1",
+  kind: WordKind,
+  noun?: NounInfo,
+  examples: readonly Example[] = [],
+): ExampleSeed {
+  const levelIndex = level === "A2" ? 0 : level === "B2" ? 1 : 2;
+  const exactNatural = examples.filter((example) => hasExactWord(example.de, word) && !isMetaExample(example));
+  const sameLevel = exactNatural.find((example) => example.level === level);
+  if (sameLevel) return { ...sameLevel, sourceKind: sameLevel.sourceKind };
+
+  const naturalCandidate = exactNatural[levelIndex];
+  if (naturalCandidate) return { ...naturalCandidate, sourceKind: naturalCandidate.sourceKind };
+
+  const generated = specialExamples[word] ?? generatedExamplesForRole(word, kind, noun);
+  const generatedCandidate = generated[levelIndex] ?? generated[generated.length - 1];
+  if (generatedCandidate && !isMetaExample(generatedCandidate)) return generatedCandidate;
+
+  return template(`Heute sehe ich ${word}.`, `Today I see ${word}.`);
+}
+
+function attachLevels(examples: ExampleSeed[]): Example[] {
+  const sorted = [...examples].sort((a, b) => cefrScore(a.de) - cefrScore(b.de));
+  return sorted.slice(0, 3).map((ex, i) => ({
+    ...ex,
+    level: (i === 0 ? "A2" : i === 1 ? "B2" : "C1") as Example["level"],
+  }));
+}
+
+function ensureCefrBands(word: string, kind: WordKind, noun: NounInfo | undefined, examples: Example[]): Example[] {
+  let fixed = examples.map((ex) => {
+    const lvl = ex.level as "A2" | "B2" | "C1";
+    if (hasExactWord(ex.de, word) && !isMetaExample(ex)) return ex;
+    const fallback = fallbackForLevel(word, lvl, kind, noun, examples);
+    return { ...fallback, level: lvl } as Example;
+  });
+  // Re-sort to guarantee monotonic A2 ≤ B2 ≤ C1 after fallback replacement
+  fixed = [...fixed].sort((a, b) => cefrScore(a.de) - cefrScore(b.de));
+  return fixed.map((ex, i) => ({ ...ex, level: (i === 0 ? "A2" : i === 1 ? "B2" : "C1") as Example["level"] }));
+}
+
+export function buildExamples(word: string, kind: WordKind, noun?: NounInfo): Example[] {
+  if (specialExamples[word]) {
+    const leveled = specialExamples[word].map((ex, i) => ({
+      ...ex,
+      level: (i === 0 ? "A2" : i === 1 ? "B2" : "C1") as Example["level"],
+    }));
+    return ensureCefrBands(word, kind, noun, leveled);
+  }
+  const sourced = cleanSourceExamples(word);
+  if (sourced.length >= 3) {
+    const leveled = attachLevels(sourced);
+    return ensureCefrBands(word, kind, noun, leveled);
+  }
+  const generated = generatedExamplesForRole(word, kind, noun);
   const merged = [...sourced, ...generated];
   const unique = new Map(merged.map((example) => [example.de, example]));
-  return [...unique.values()].slice(0, 3);
+  return ensureCefrBands(word, kind, noun, attachLevels([...unique.values()]));
 }
 
 export function buildExplanation(word: string, kind: WordKind, gloss: string, noun?: NounInfo) {

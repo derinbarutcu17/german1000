@@ -1,24 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "../components/AppShell";
 import { FeedbackPanel } from "../components/FeedbackPanel";
 import { Footer } from "../components/Footer";
 import { WordExamples } from "../components/WordExamples";
-import { records } from "../data/records";
+import type { WordRecord } from "../data/records";
 import { buildExerciseBank, type ExerciseItem } from "../lib/exercises";
-
-function focusElement(element: HTMLElement | null) {
-  if (!element) return;
-  element.focus();
-  element.scrollIntoView({
-    block: "center",
-    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
-  });
-}
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 const letters = ["A", "B", "C", "D"] as const;
@@ -34,6 +25,9 @@ export default function ExercisesPage() {
   const { trigger } = useWebHaptics();
   const questionTitleRef = useRef<HTMLHeadingElement>(null);
   const completeTitleRef = useRef<HTMLHeadingElement>(null);
+  const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const prevIndexRef = useRef(0);
+  const recordsRef = useRef<WordRecord[]>([]);
   const shouldReduceMotion = useReducedMotion();
   const item = bank[index];
   const selectedOption = item?.options.find((option) => option.value === selected) ?? null;
@@ -41,9 +35,56 @@ export default function ExercisesPage() {
   const complete = bank.length > 0 && index >= bank.length;
   const progress = bank.length ? (index + (submitted ? 1 : 0)) / bank.length : 0;
 
+  const handleQuestionRef = useCallback(
+    (node: HTMLHeadingElement | null) => {
+      questionTitleRef.current = node;
+      if (node && bank.length > 0 && !complete && !submitted && prevIndexRef.current !== index) {
+        requestAnimationFrame(() => {
+          node.focus();
+          node.scrollIntoView({ block: "center", behavior: shouldReduceMotion ? "auto" : "smooth" });
+        });
+      }
+      prevIndexRef.current = index;
+    },
+    [bank.length, complete, submitted, index, shouldReduceMotion],
+  );
+
+  const handleCompleteRef = useCallback(
+    (node: HTMLHeadingElement | null) => {
+      completeTitleRef.current = node;
+      if (node && complete) {
+        requestAnimationFrame(() => {
+          node.focus();
+          node.scrollIntoView({ block: "center", behavior: shouldReduceMotion ? "auto" : "smooth" });
+        });
+      }
+    },
+    [complete, shouldReduceMotion],
+  );
+
+  const handleNextRef = useCallback(
+    (node: HTMLButtonElement | null) => {
+      nextButtonRef.current = node;
+      if (node && submitted) {
+        requestAnimationFrame(() => node.focus());
+      }
+    },
+    [submitted],
+  );
+
   useEffect(() => {
-    const timer = window.setTimeout(() => setBank(buildExerciseBank(records, records.length)), 0);
-    return () => window.clearTimeout(timer);
+    let active = true;
+    const timer = window.setTimeout(() => {
+      void import("../data/records").then(({ records: loadedRecords }) => {
+        if (!active) return;
+        recordsRef.current = loadedRecords;
+        setBank(buildExerciseBank(loadedRecords, loadedRecords.length));
+      });
+    }, 0);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
   }, []);
 
   // Keyboard: 1-4 to select, Enter to submit/next
@@ -53,7 +94,10 @@ export default function ExercisesPage() {
       if (!submitted && e.key >= "1" && e.key <= "4") {
         const idx = Number(e.key) - 1;
         const opt = item.options[idx];
-        if (opt) setSelected(opt.value);
+        if (opt) {
+          setSelected(opt.value);
+          submitAnswer(opt.value);
+        }
       }
       if (e.key === "Enter") {
         if (!submitted && selected) submitAnswer();
@@ -65,25 +109,28 @@ export default function ExercisesPage() {
   }, [item, selected, submitted, complete, isCorrect, correctCount, wrongCount]);
 
   function shuffleAgain() {
-    setBank(buildExerciseBank(records, records.length));
+    const loadedRecords = recordsRef.current;
+    if (!loadedRecords.length) return;
+    setBank(buildExerciseBank(loadedRecords, loadedRecords.length));
     setIndex(0);
     setSelected(null);
     setSubmitted(false);
     setCorrectCount(0);
     setWrongCount(0);
     setAnnouncement("A new order of all 1,000 questions is ready.");
-    window.setTimeout(() => focusElement(questionTitleRef.current), 0);
   }
 
-  function submitAnswer() {
-    if (!selected || submitted || !item) return;
-    trigger(isCorrect ? "success" : "error");
+  function submitAnswer(answer: string | null = selected) {
+    const answerOption = item?.options.find((option) => option.value === answer);
+    if (!answer || submitted || !item || !answerOption) return;
+    const answerIsCorrect = answerOption.correct;
+    trigger(answerIsCorrect ? "success" : "error");
     setSubmitted(true);
-    const nextCorrectCount = correctCount + (isCorrect ? 1 : 0);
-    const nextWrongCount = wrongCount + (isCorrect ? 0 : 1);
-    if (isCorrect) setCorrectCount(nextCorrectCount);
+    const nextCorrectCount = correctCount + (answerIsCorrect ? 1 : 0);
+    const nextWrongCount = wrongCount + (answerIsCorrect ? 0 : 1);
+    if (answerIsCorrect) setCorrectCount(nextCorrectCount);
     else setWrongCount(nextWrongCount);
-    setAnnouncement(`${isCorrect ? "Correct" : "Not quite"}. Score: ${nextCorrectCount} correct, ${nextWrongCount} wrong.`);
+    setAnnouncement(`${answerIsCorrect ? "Correct" : "Not quite"}. Score: ${nextCorrectCount} correct, ${nextWrongCount} wrong.`);
   }
 
   function nextQuestion() {
@@ -92,14 +139,12 @@ export default function ExercisesPage() {
       setSelected(null);
       setSubmitted(false);
       setAnnouncement("You reached all 1,000 questions. Shuffle again to start a new round.");
-      window.setTimeout(() => focusElement(completeTitleRef.current), 0);
       return;
     }
     setIndex((current) => current + 1);
     setSelected(null);
     setSubmitted(false);
     setAnnouncement("Next question.");
-    window.setTimeout(() => focusElement(questionTitleRef.current), 0);
   }
 
   return (
@@ -110,32 +155,36 @@ export default function ExercisesPage() {
         <section className="section-heading" aria-labelledby="exercise-title">
           <div className="exercise-intro">
             <h1 id="exercise-title">Exercises</h1>
-            <p>Choose the closest meaning. One question per word, fresh shuffle every round — no saving, just practice.</p>
           </div>
-          <div className="score-card" aria-label={`Round score: ${correctCount} correct, ${wrongCount} wrong`}>
-            <div className="score-card__item score-card__item--correct">
+          <div className="score-card" role="group" aria-label={`Round score: ${correctCount} correct, ${wrongCount} wrong`}>
+            <span className="score-card__caption" aria-hidden="true">Score</span>
+            <div className="score-card__item score-card__item--correct" aria-hidden="true">
+              <span className="score-card__icon score-card__icon--check" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 13 4 4 10-9" /></svg>
+              </span>
               <motion.span
                 key={"c-" + correctCount}
-                initial={shouldReduceMotion ? false : { scale: 0.92, y: 2 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ duration: 0.32, ease: easeOut }}
+                initial={shouldReduceMotion ? false : { scale: 0.96 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.16, ease: easeOut }}
                 className="score-card__number"
               >
                 {correctCount}
               </motion.span>
-              <span className="score-card__label">Correct</span>
             </div>
-            <div className="score-card__item score-card__item--wrong">
+            <div className="score-card__item score-card__item--wrong" aria-hidden="true">
+              <span className="score-card__icon score-card__icon--cross" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 6 18 18" /><path d="M18 6 6 18" /></svg>
+              </span>
               <motion.span
                 key={"w-" + wrongCount}
-                initial={shouldReduceMotion ? false : { scale: 0.92, y: 2 }}
-                animate={{ scale: 1, y: 0 }}
-                transition={{ duration: 0.32, ease: easeOut }}
+                initial={shouldReduceMotion ? false : { scale: 0.96 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.16, ease: easeOut }}
                 className="score-card__number"
               >
                 {wrongCount}
               </motion.span>
-              <span className="score-card__label">Wrong</span>
             </div>
           </div>
         </section>
@@ -153,7 +202,7 @@ export default function ExercisesPage() {
             className="empty-state exercise-complete"
             aria-labelledby="exercise-complete-title"
           >
-            <h2 id="exercise-complete-title" ref={completeTitleRef} tabIndex={-1}>All 1,000 questions answered.</h2>
+            <h2 id="exercise-complete-title" ref={handleCompleteRef} tabIndex={-1}>All 1,000 questions answered.</h2>
             <p>You made it through this temporary question order with {correctCount} correct and {wrongCount} wrong answers. Reloading or reshuffling starts clean.</p>
             <div className="empty-state-action">
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
@@ -165,10 +214,10 @@ export default function ExercisesPage() {
             <AnimatePresence mode="wait">
               <motion.section
                 key={item.record.rank}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
-                transition={{ duration: 0.36, ease: easeOut }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
+                transition={{ duration: 0.16, ease: easeOut }}
                 className="exercise-card"
                 aria-labelledby="question-title"
               >
@@ -186,34 +235,24 @@ export default function ExercisesPage() {
                   <span>
                     Question <strong>{String(index + 1).padStart(4, "0")}</strong> · {bank.length.toLocaleString()}
                   </span>
-                  <span>{Math.round(progress * 100)}%</span>
                 </div>
 
                 <div className="exercise-prompt">
-                  <span className="exercise-kicker" aria-hidden="true"><i /> #{String(item.record.rank).padStart(3, "0")} <i /></span>
                   <motion.h2
                     id="question-title"
-                    ref={questionTitleRef}
+                    ref={handleQuestionRef}
                     tabIndex={-1}
                     lang="de"
-                    initial={shouldReduceMotion ? false : { opacity: 0, y: 6, filter: "blur(6px)" }}
-                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                    transition={{ duration: 0.42, ease: easeOut, delay: 0.05 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.14, ease: easeOut }}
                   >
                     {item.prompt}
                   </motion.h2>
                 </div>
 
-                <motion.fieldset
-                  className="choice-group"
-                  initial="hidden"
-                  animate="visible"
-                  variants={{
-                    hidden: {},
-                    visible: { transition: { staggerChildren: shouldReduceMotion ? 0 : 0.06, delayChildren: 0.08 } },
-                  }}
-                >
-                  <legend>{item.instruction}</legend>
+                <fieldset className="choice-group">
+                  <legend className="sr-only">{item.instruction}</legend>
                   <div className="choice-grid">
                     {item.options.map((option, i) => {
                       const optionId = "exercise-option-" + item.record.rank + "-" + option.value;
@@ -229,19 +268,7 @@ export default function ExercisesPage() {
                           key={option.value}
                           htmlFor={optionId}
                           className={stateClass}
-                          variants={
-                            shouldReduceMotion
-                              ? {}
-                              : {
-                                  hidden: { opacity: 0, y: 8 },
-                                  visible: { opacity: 1, y: 0, transition: { duration: 0.34, ease: easeOut } },
-                                }
-                          }
-                          animate={
-                            shake
-                              ? { x: [0, -3, 3, -2, 2, 0], transition: { duration: 0.32, ease: "easeOut" } }
-                              : undefined
-                          }
+                          animate={shake ? { x: [0, -3, 3, -2, 2, 0], transition: { duration: 0.14, ease: "easeOut" } } : undefined}
                           whileTap={!submitted ? { scale: 0.985 } : undefined}
                           transition={{ duration: 0.12, ease: easeOut }}
                         >
@@ -253,58 +280,45 @@ export default function ExercisesPage() {
                             checked={isSelected}
                             onChange={() => {
                               if (submitted) return;
-                              setSelected(isSelected ? null : option.value);
-                            }}
-                            onClick={() => {
-                              if (submitted) return;
-                              if (isSelected) setSelected(null);
+                              setSelected(option.value);
+                              submitAnswer(option.value);
                             }}
                             disabled={submitted}
                           />
                           <span className="choice__letter" aria-hidden="true">{letters[i]}</span>
                           <span>{option.label}</span>
+                          {submitted && isRight && <span className="choice__status choice__status--correct" aria-hidden="true">✓</span>}
+                          {submitted && isSelected && !isRight && <span className="choice__status choice__status--incorrect" aria-hidden="true">✕</span>}
                         </motion.label>
                       );
                     })}
                   </div>
-                </motion.fieldset>
+                </fieldset>
 
 
 
-                <div className="exercise-actions">
+                {submitted && <div className="exercise-actions">
                   <AnimatePresence mode="wait" initial={false}>
-                    {!submitted ? (
-                      <motion.button
-                        key="check"
-                        type="button"
-                        className="button button-dark"
-                        onClick={submitAnswer}
-                        disabled={!selected}
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -4 }}
-                        transition={{ duration: 0.2, ease: easeOut }}
-                        whileTap={selected ? { scale: 0.97 } : undefined}
-                      >
-                        Check answer
-                      </motion.button>
-                    ) : (
-                      <motion.button
-                        key="next"
-                        type="button"
-                        className="button button-dark"
-                        onClick={nextQuestion}
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2, ease: easeOut }}
-                        whileTap={{ scale: 0.97 }}
-                      >
-                        {index + 1 >= bank.length ? "Finish round" : "Next question →"}
-                      </motion.button>
-                    )}
+                    <motion.button
+                      key="next"
+                      ref={handleNextRef}
+                      type="button"
+                      className="button button-dark"
+                      onClick={nextQuestion}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2, ease: easeOut }}
+                      whileTap={{ scale: 0.97 }}
+                      onAnimationComplete={() => {
+                        // Fallback for reduced-motion where initial is false and callback ref already focused.
+                        if (submitted) handleNextRef(nextButtonRef.current);
+                      }}
+                    >
+                      {index + 1 >= bank.length ? "Finish round" : "Next question →"}
+                    </motion.button>
                   </AnimatePresence>
-                </div>
+                </div>}
 
                 <AnimatePresence initial={false}>
                   {submitted && (
@@ -314,13 +328,13 @@ export default function ExercisesPage() {
                       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
-                      transition={{ duration: 0.5, ease: easeOut }}
+                      transition={{ duration: 0.16, ease: easeOut }}
                       style={{ overflow: "hidden" }}
                     >
                       <motion.div
-                        initial={shouldReduceMotion ? false : { y: 8, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ duration: 0.36, ease: easeOut, delay: 0.07 }}
+                        initial={shouldReduceMotion ? false : { opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.14, ease: easeOut }}
                       >
                         <FeedbackPanel correct={isCorrect} answer={item.answer} />
                         <div style={{ marginTop: 16 }}>

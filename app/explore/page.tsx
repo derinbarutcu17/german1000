@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
@@ -9,9 +9,25 @@ import { WordCard } from "../components/WordCard";
 import { records } from "../data/records";
 import { buildExploreParams, filterRecords, normalizeExploreQuery, type ExploreQuery } from "../lib/search";
 
+const RESULTS_PAGE_SIZE = 48;
+const TYPE_FILTERS: Array<{ value: ExploreQuery["type"]; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "noun", label: "Noun" },
+  { value: "verb", label: "Verb" },
+  { value: "adjective", label: "Adjective" },
+  { value: "adverb", label: "Adverb" },
+  { value: "other", label: "Other" },
+];
+
 export default function ExplorePage() {
   const [query, setQuery] = useState<ExploreQuery>(() => normalizeExploreQuery(new URLSearchParams()));
-  const filtered = useMemo(() => filterRecords(records, query), [query]);
+  const [visibleState, setVisibleState] = useState({ key: "", count: RESULTS_PAGE_SIZE });
+  const deferredQuery = useDeferredValue(query);
+  const filtered = useMemo(() => filterRecords(records, deferredQuery), [deferredQuery]);
+  const queryKey = query.q + "\u0000" + query.type;
+  const visibleCount = visibleState.key === queryKey ? visibleState.count : RESULTS_PAGE_SIZE;
+  const visibleRecords = filtered.slice(0, visibleCount);
+  const resultsPending = deferredQuery.q !== query.q || deferredQuery.type !== query.type;
 
   useEffect(() => {
     const syncFromUrl = () => {
@@ -35,22 +51,24 @@ export default function ExplorePage() {
   return (
     <AppShell>
       <main id="main-content" className="page-stack explore-page">
-        <section className="section-heading explore-heading" aria-labelledby="explore-title">
-          <h1 id="explore-title">Explore all 1,000.</h1>
+        <section className="explore-intro" aria-labelledby="explore-title">
+          <div>
+            <h1 id="explore-title">All 1,000 words, in one place.</h1>
+          </div>
         </section>
 
-        <section className="filter-panel filter-panel--simple" aria-label="Search the word list">
+        <section className="explore-search" aria-label="Search the word list">
           <form className="search-form" role="search" onSubmit={(event) => event.preventDefault()}>
             <label className="field field--search">
-              <span>Search all 1,000 words</span>
               <span className="search-input-wrap">
-              <input
-                type="search"
-                value={query.q}
-                onChange={(event) => updateQuery({ q: event.target.value })}
-                placeholder="Search a German word, meaning, or sentence"
-                autoComplete="off"
-              />
+                <input
+                  type="search"
+                  value={query.q}
+                  onChange={(event) => updateQuery({ q: event.target.value })}
+                  placeholder="Search by word, meaning, or example"
+                  aria-label="Search by word, meaning, or example"
+                  autoComplete="off"
+                />
                 {query.q && (
                   <button className="search-clear" type="button" onClick={() => updateQuery({ q: "" })} aria-label="Clear search">
                     ×
@@ -59,19 +77,53 @@ export default function ExplorePage() {
               </span>
             </label>
           </form>
-          <p className="sr-only" role="status" aria-live="polite">
-            {filtered.length.toLocaleString()} words match the current filters.
+          <p className="explore-search__count" role="status" aria-live="polite">
+            {filtered.length.toLocaleString()} {filtered.length === 1 ? "word" : "words"}
           </p>
         </section>
 
+        <div className="explore-filters" role="group" aria-label="Filter by word type">
+          {TYPE_FILTERS.map((filter) => {
+            const active = query.type === filter.value;
+            return (
+              <button
+                key={filter.value}
+                type="button"
+                className={active ? "filter-chip filter-chip--active" : "filter-chip"}
+                aria-pressed={active}
+                onClick={() => updateQuery({ type: filter.value })}
+              >
+                {filter.label}
+              </button>
+            );
+          })}
+        </div>
+
         {filtered.length > 0 ? (
-          <section className="explore-results" aria-labelledby="results-title">
+          <section className="explore-results" aria-labelledby="results-title" aria-busy={resultsPending}>
             <div className="results-toolbar">
               <h2 id="results-title">The word list</h2>
             </div>
             <div className="word-index">
-              {filtered.map((record) => <WordCard key={record.rank} record={record} />)}
+              {visibleRecords.map((record) => <WordCard key={record.rank} record={record} />)}
             </div>
+            {visibleRecords.length < filtered.length && (
+              <div className="results-more">
+                <p>
+                  Showing {visibleRecords.length.toLocaleString()} of {filtered.length.toLocaleString()} words.
+                </p>
+                <button
+                  type="button"
+                  className="button button-subtle"
+                  onClick={() => setVisibleState({
+                    key: queryKey,
+                    count: Math.min(visibleCount + RESULTS_PAGE_SIZE, filtered.length),
+                  })}
+                >
+                  Load more words <span aria-hidden="true">↓</span>
+                </button>
+              </div>
+            )}
           </section>
         ) : (
           <EmptyState

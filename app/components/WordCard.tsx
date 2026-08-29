@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { displayWord, type WordRecord } from "../data/records";
+import { useEffect, useRef, useState } from "react";
+import type { WordRecord } from "../data/records";
+import { displayWord } from "../lib/word-utils";
 import { WordExamples } from "./WordExamples";
 
 export function WordCard({ record }: { record: WordRecord }) {
@@ -9,18 +10,19 @@ export function WordCard({ record }: { record: WordRecord }) {
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentH, setContentH] = useState(0);
 
-  useLayoutEffect(() => {
-    setContentH(contentRef.current?.offsetHeight ?? 0);
-  }, [examplesOpen, record.rank]);
-
   useEffect(() => {
+    if (!examplesOpen || !contentRef.current) return;
+
     function measure() {
       setContentH(contentRef.current?.offsetHeight ?? 0);
     }
     const observer = new ResizeObserver(measure);
-    if (contentRef.current) observer.observe(contentRef.current);
-    measure();
-    return () => observer.disconnect();
+    observer.observe(contentRef.current);
+    const frame = requestAnimationFrame(measure);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [examplesOpen, record.rank]);
 
   return (
@@ -50,9 +52,11 @@ export function WordCard({ record }: { record: WordRecord }) {
           style={{ height: examplesOpen && contentH ? contentH : 0 }}
           aria-hidden={!examplesOpen}
         >
-          <div ref={contentRef} className="word-details__content">
-            <WordExamples record={record} compact />
-          </div>
+          {examplesOpen && (
+            <div ref={contentRef} className="word-details__content">
+              <WordExamples record={record} compact />
+            </div>
+          )}
         </div>
       </div>
     </article>

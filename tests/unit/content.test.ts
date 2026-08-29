@@ -24,6 +24,15 @@ test("gives every surface form distinct bilingual sentence examples", () => {
   }
 });
 
+test("does not surface quoted-word fallback examples", () => {
+  const quotedWordTemplate = /\b(?:das Wort|the word)\s+["“][^"”]+["”]/iu;
+  for (const record of records) {
+    for (const example of record.examples) {
+      assert.doesNotMatch(`${example.de} ${example.en}`, quotedWordTemplate, record.word);
+    }
+  }
+});
+
 test("keeps known source gloss hazards corrected in the surfaced records", () => {
   const byWord = new Map(records.map((record) => [record.word, record]));
   assert.match(byWord.get("schon")?.gloss ?? "", /already|soon/);

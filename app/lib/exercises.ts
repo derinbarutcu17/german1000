@@ -1,4 +1,5 @@
-import { displayWord, firstMeaning, type WordRecord } from "../data/records";
+import type { WordRecord } from "../data/records";
+import { displayWord, firstMeaning } from "./word-utils";
 import { cryptoRandom, shuffle, type RandomSource } from "./random";
 
 export type ExerciseOption = {

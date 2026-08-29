@@ -8,6 +8,15 @@ export type ExploreQuery = {
 };
 
 const kinds: ExploreType[] = ["all", "function", "noun", "verb", "adjective", "adverb", "name", "number", "other"];
+const searchIndex = new WeakMap<WordRecord, string>();
+
+function indexedSearchText(record: WordRecord) {
+  const cached = searchIndex.get(record);
+  if (cached) return cached;
+  const text = searchText(record);
+  searchIndex.set(record, text);
+  return text;
+}
 
 export function normalizeExploreQuery(params: URLSearchParams): ExploreQuery {
   const type = params.get("type") as ExploreType | null;
@@ -27,8 +36,12 @@ export function buildExploreParams(query: ExploreQuery) {
 export function filterRecords(records: readonly WordRecord[], query: ExploreQuery) {
   const term = query.q.trim().toLocaleLowerCase("de-DE").normalize("NFD").replace(/\p{Diacritic}/gu, "");
   return records.filter((record) => {
-    const matchesText = !term || searchText(record).includes(term);
-    const matchesType = query.type === "all" || record.kind === query.type;
+    const matchesText = !term || indexedSearchText(record).includes(term);
+    const matchesType =
+      query.type === "all" ||
+      (query.type === "other"
+        ? ["other", "function", "name", "number"].includes(record.kind)
+        : record.kind === query.type);
     return matchesText && matchesType;
   });
 }
