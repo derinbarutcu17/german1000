@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "./components/AppShell";
 import { AsciiWaveBackground } from "./components/AsciiWaveBackground";
-import { Footer } from "./components/Footer";
 import { TextReveal } from "./components/TextReveal";
 import { WordExamples } from "./components/WordExamples";
 import { records as staticRecords } from "./data/records";
@@ -17,9 +15,16 @@ const INITIAL_CARD: WordRecord = staticRecords[0];
 
 function focusElement(element: HTMLElement | null) {
   if (!element) return;
-  element.focus();
+  // Focus without the browser's instant jump, then only nudge the page if
+  // the target is actually outside the viewport. block:"nearest" moves the
+  // minimal distance instead of yanking to center on every reveal.
+  element.focus({ preventScroll: true });
+  const rect = element.getBoundingClientRect();
+  const topEdge = 112;
+  const bottomEdge = window.innerHeight - 24;
+  if (rect.top >= topEdge && rect.bottom <= bottomEdge) return;
   element.scrollIntoView({
-    block: "center",
+    block: "nearest",
     behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
   });
 }
@@ -31,7 +36,7 @@ export default function FlashcardsPage() {
   const [complete, setComplete] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const { trigger } = useWebHaptics();
-  const wordRef = useRef<HTMLHeadingElement>(null);
+  const wordRef = useRef<HTMLButtonElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
   const completeRef = useRef<HTMLDivElement>(null);
   const [backH, setBackH] = useState(0);
@@ -64,7 +69,7 @@ export default function FlashcardsPage() {
     trigger("selection");
     setRevealed(true);
     setAnnouncement("Explanation revealed for " + displayWord(record) + ".");
-    window.setTimeout(() => backRef.current?.focus({ preventScroll: true }), 0);
+    window.setTimeout(() => focusElement(backRef.current), 0);
   }
 
   function nextCard() {
@@ -111,7 +116,7 @@ export default function FlashcardsPage() {
               <TextReveal text="The 1000 words behind everyday German." startOnView={false} />
             </h1>
             <p className="hero-deck">
-              <TextReveal text="These 1000 words cover roughly 80% of daily conversation. Draw a card, learn it in context, then shuffle for a fresh order." startOnView={false} />
+              <TextReveal text="These cards make up roughly 80% of daily German. Explore the cards and learn it through exercises." startOnView={false} />
             </p>
           </div>
         </section>
@@ -128,8 +133,12 @@ export default function FlashcardsPage() {
           ) : (
             <article className={"flashcard" + (revealed ? " flashcard--revealed" : "")} aria-label={displayWord(record)}>
               <div className="flashcard-topline">
-                <span>#{String(record.rank).padStart(3, "0")}</span>
+                <span>
+                  {deck.length === staticRecords.length ? `Card ${position + 1} / ${deck.length.toLocaleString()} · ` : ""}
+                  Frequency #{String(record.rank).padStart(3, "0")}
+                </span>
                 <button type="button" className="skip-button" aria-label="Skip card" onClick={nextCard}>
+                  <span className="skip-button__label">Skip</span>
                   <svg className="skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
                   </svg>
@@ -137,22 +146,45 @@ export default function FlashcardsPage() {
               </div>
 
               <div className="flashcard-front">
-                <div className="flashcard-wordline">
-                  <h3 id="flashcard-word" ref={wordRef} tabIndex={-1} lang="de">{displayWord(record)}</h3>
-                </div>
-                <button className="button button-dark flashcard-reveal" type="button" onClick={() => (revealed ? showFront() : reveal())} aria-controls="flashcard-back" aria-expanded={revealed}>
-                  Reveal the back <span aria-hidden="true">↓</span>
+                <button
+                  type="button"
+                  className="flashcard-word"
+                  ref={wordRef}
+                  onClick={() => (revealed ? showFront() : reveal())}
+                  aria-expanded={revealed}
+                  aria-controls="flashcard-back"
+                  aria-label={revealed ? displayWord(record) + ", hide meaning" : displayWord(record) + ", tap to reveal meaning"}
+                >
+                  <span className="flashcard-word__text" lang="de">
+                    <TextReveal
+                      key={record.rank}
+                      text={displayWord(record)}
+                      by="character"
+                      startOnView={false}
+                      stagger={0.018}
+                      maxDuration={0.5}
+                      delay={0.45}
+                    />
+                  </span>
+                  {!revealed && (
+                    <span className="flashcard-word__hint" aria-hidden="true">Tap to reveal ↓</span>
+                  )}
                 </button>
               </div>
 
-              <div className="flashcard-back-wrap" style={{ height: revealed && backH ? backH : 0 }}>
-                <div className="flashcard-back" id="flashcard-back" ref={backRef} tabIndex={-1} aria-labelledby="flashcard-back-title">
+              <div className="flashcard-back-wrap" style={{ height: revealed && backH ? backH : 0 }} aria-hidden={!revealed}>
+                <div className="flashcard-back" id="flashcard-back" ref={backRef} tabIndex={-1} aria-labelledby="flashcard-back-title" hidden={!revealed}>
                   <h3 className="flashcard-gloss" id="flashcard-back-title">{record.gloss}</h3>
                   <p className="flashcard-explanation">{record.explanation}</p>
                   {record.usageNote && <p className="usage-note"><strong>Usage note:</strong> {record.usageNote}</p>}
                   <WordExamples record={record} />
                   <div className="flashcard-actions">
-                    <button className="button button-dark" type="button" onClick={nextCard}>Next random card</button>
+                    <button type="button" className="skip-button" aria-label="Skip to next card" onClick={nextCard}>
+                      <span className="skip-button__label">Skip</span>
+                      <svg className="skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -160,7 +192,6 @@ export default function FlashcardsPage() {
           )}
         </section>
       </main>
-      <Footer />
     </AppShell>
   );
 }

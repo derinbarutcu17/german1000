@@ -2,13 +2,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { WordRecord } from "../data/records";
+import { getSearchMatchKind, type SearchMatchKind } from "../lib/search";
 import { displayWord } from "../lib/word-utils";
 import { WordExamples } from "./WordExamples";
 
-export function WordCard({ record }: { record: WordRecord }) {
+const matchLabels: Record<SearchMatchKind, string> = {
+  exact: "Exact word",
+  word: "Word match",
+  meaning: "Meaning match",
+  explanation: "Explanation match",
+  example: "Example match",
+};
+
+export function WordCard({ record, query = "" }: { record: WordRecord; query?: string }) {
   const [examplesOpen, setExamplesOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
   const [contentH, setContentH] = useState(0);
+  const matchKind = query ? getSearchMatchKind(record, query) : null;
 
   useEffect(() => {
     if (!examplesOpen || !contentRef.current) return;
@@ -29,8 +39,10 @@ export function WordCard({ record }: { record: WordRecord }) {
     <article className="word-card word-card--index" id={"word-" + String(record.rank).padStart(3, "0")}>
       <div className="word-heading-row">
         <div>
+          <p className="word-rank">#{String(record.rank).padStart(3, "0")}</p>
           <h3 lang="de">{displayWord(record)}</h3>
           {record.lemma && record.lemma !== record.word && <p className="surface-note">form: {record.word} · base: {record.lemma}</p>}
+          {matchKind && <p className="search-match-note">{matchLabels[matchKind]}</p>}
         </div>
       </div>
       <p className="word-gloss">{record.gloss}</p>
@@ -44,7 +56,7 @@ export function WordCard({ record }: { record: WordRecord }) {
           aria-controls={"word-details-" + String(record.rank).padStart(3, "0")}
           onClick={() => setExamplesOpen((v) => !v)}
         >
-          Examples in context <span aria-hidden="true">{examplesOpen ? "↑" : "↓"}</span>
+          {examplesOpen ? "Hide" : "Show"} examples for {displayWord(record)} <span aria-hidden="true">{examplesOpen ? "↑" : "↓"}</span>
         </button>
         <div
           className="word-details__wrap"

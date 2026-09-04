@@ -66,7 +66,7 @@ function ExercisesIcon({ className }: { className?: string }) {
 
 const destinations: NavDest[] = [
   { href: "/", label: "Cards", flag: "black", icon: CardsIcon },
-  { href: "/explore", label: "Explore", flag: "red", icon: ExploreIcon },
+  { href: "/explore", label: "Words", flag: "red", icon: ExploreIcon },
   { href: "/exercises", label: "Exercises", flag: "gold", icon: ExercisesIcon },
 ];
 

@@ -1,10 +1,9 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "../components/AppShell";
 import { EmptyState } from "../components/EmptyState";
-import { Footer } from "../components/Footer";
 import { WordCard } from "../components/WordCard";
 import { records } from "../data/records";
 import { buildExploreParams, filterRecords, normalizeExploreQuery, type ExploreQuery } from "../lib/search";
@@ -12,22 +11,23 @@ import { buildExploreParams, filterRecords, normalizeExploreQuery, type ExploreQ
 const RESULTS_PAGE_SIZE = 48;
 const TYPE_FILTERS: Array<{ value: ExploreQuery["type"]; label: string }> = [
   { value: "all", label: "All" },
+  { value: "function", label: "Function" },
   { value: "noun", label: "Noun" },
   { value: "verb", label: "Verb" },
   { value: "adjective", label: "Adjective" },
   { value: "adverb", label: "Adverb" },
+  { value: "name", label: "Name" },
+  { value: "number", label: "Number" },
   { value: "other", label: "Other" },
 ];
 
 export default function ExplorePage() {
   const [query, setQuery] = useState<ExploreQuery>(() => normalizeExploreQuery(new URLSearchParams()));
   const [visibleState, setVisibleState] = useState({ key: "", count: RESULTS_PAGE_SIZE });
-  const deferredQuery = useDeferredValue(query);
-  const filtered = useMemo(() => filterRecords(records, deferredQuery), [deferredQuery]);
+  const filtered = useMemo(() => filterRecords(records, query), [query]);
   const queryKey = query.q + "\u0000" + query.type;
   const visibleCount = visibleState.key === queryKey ? visibleState.count : RESULTS_PAGE_SIZE;
   const visibleRecords = filtered.slice(0, visibleCount);
-  const resultsPending = deferredQuery.q !== query.q || deferredQuery.type !== query.type;
 
   useEffect(() => {
     const syncFromUrl = () => {
@@ -59,14 +59,16 @@ export default function ExplorePage() {
 
         <section className="explore-search" aria-label="Search the word list">
           <form className="search-form" role="search" onSubmit={(event) => event.preventDefault()}>
-            <label className="field field--search">
+            <label className="field field--search" htmlFor="word-search">
+              <span className="field-label">Search words</span>
               <span className="search-input-wrap">
                 <input
+                  id="word-search"
+                  name="q"
                   type="search"
                   value={query.q}
                   onChange={(event) => updateQuery({ q: event.target.value })}
                   placeholder="Search by word, meaning, or example"
-                  aria-label="Search by word, meaning, or example"
                   autoComplete="off"
                 />
                 {query.q && (
@@ -100,12 +102,12 @@ export default function ExplorePage() {
         </div>
 
         {filtered.length > 0 ? (
-          <section className="explore-results" aria-labelledby="results-title" aria-busy={resultsPending}>
-            <div className="results-toolbar">
-              <h2 id="results-title">The word list</h2>
+          <section className="explore-results" aria-label="Words">
+            <div className="explore-results-meta" aria-label={query.q ? "Results sorted by relevance" : "Words sorted by frequency"}>
+              <span>{query.q ? "Relevance" : "Frequency order"}</span>
             </div>
             <div className="word-index">
-              {visibleRecords.map((record) => <WordCard key={record.rank} record={record} />)}
+              {visibleRecords.map((record) => <WordCard key={record.rank} record={record} query={query.q} />)}
             </div>
             {visibleRecords.length < filtered.length && (
               <div className="results-more">
@@ -134,7 +136,6 @@ export default function ExplorePage() {
           />
         )}
       </main>
-      <Footer />
     </AppShell>
   );
 }

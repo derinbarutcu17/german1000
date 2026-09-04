@@ -25,6 +25,20 @@ test("searches sentence context and ignores accents", () => {
   assert.ok(accentMatches.some((record) => record.word === "über"));
 });
 
+test("ranks exact word matches ahead of sentence-context matches", () => {
+  const matches = filterRecords(records, normalizeExploreQuery(new URLSearchParams("q=gehen")));
+  assert.ok(matches.length > 1);
+  assert.equal(matches[0]?.word, "gehen");
+});
+
+test("keeps function, name, number, and other filters distinct", () => {
+  for (const type of ["function", "name", "number", "other"] as const) {
+    const matches = filterRecords(records, normalizeExploreQuery(new URLSearchParams(`type=${type}`)));
+    assert.ok(matches.length > 0, type);
+    assert.ok(matches.every((record) => record.kind === type), type);
+  }
+});
+
 test("keeps the complete index available without pagination", () => {
   const query = normalizeExploreQuery(new URLSearchParams());
   assert.equal(filterRecords(records, query).length, 1000);

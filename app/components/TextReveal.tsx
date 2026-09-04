@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo, useRef } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useInView, useReducedMotion } from "motion/react";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -31,6 +31,7 @@ export type UseTextRevealOptions = {
   play?: boolean;
   once?: boolean;
   amount?: number;
+  delay?: number;
 };
 
 export function useTextReveal<T extends HTMLElement = HTMLSpanElement>({
@@ -42,10 +43,18 @@ export function useTextReveal<T extends HTMLElement = HTMLSpanElement>({
   play = true,
   once = true,
   amount = 0.35,
+  delay = 0,
 }: UseTextRevealOptions) {
   const ref = useRef<T>(null);
   const inView = useInView(ref, { once, amount });
   const reduced = useReducedMotion();
+  const [delayElapsed, setDelayElapsed] = useState(delay <= 0);
+
+  useEffect(() => {
+    if (delay <= 0) return;
+    const timer = window.setTimeout(() => setDelayElapsed(true), delay * 1000);
+    return () => window.clearTimeout(timer);
+  }, [delay]);
 
   const { groups, step, count } = useMemo(() => {
     const words = text.trim().length ? text.trim().split(/\s+/) : [];
@@ -78,7 +87,7 @@ export function useTextReveal<T extends HTMLElement = HTMLSpanElement>({
     };
   }, [text, by, stagger, maxDuration]);
 
-  const started = play && (!startOnView || inView);
+  const started = play && delayElapsed && (!startOnView || inView);
 
   return {
     ref,
@@ -104,10 +113,11 @@ export function TextReveal({
   play = true,
   once = true,
   amount = 0.35,
+  delay = 0,
   className = "",
 }: TextRevealProps) {
   const { ref, groups, step, started, reduced } = useTextReveal<HTMLSpanElement>(
-    { text, by, stagger, maxDuration, startOnView, play, once, amount },
+    { text, by, stagger, maxDuration, startOnView, play, once, amount, delay },
   );
 
   return (

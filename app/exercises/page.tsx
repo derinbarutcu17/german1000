@@ -5,14 +5,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "../components/AppShell";
-import { FeedbackPanel } from "../components/FeedbackPanel";
-import { Footer } from "../components/Footer";
 import { WordExamples } from "../components/WordExamples";
 import type { WordRecord } from "../data/records";
 import { buildExerciseBank, type ExerciseItem } from "../lib/exercises";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
 const letters = ["A", "B", "C", "D"] as const;
+const SESSION_SIZES = [10, 25, 50, 1000] as const;
+type SessionSize = (typeof SESSION_SIZES)[number];
+const DEFAULT_SESSION_SIZE: SessionSize = 25;
 
 export default function ExercisesPage() {
   const [bank, setBank] = useState<ExerciseItem[]>([]);
@@ -21,19 +22,17 @@ export default function ExercisesPage() {
   const [submitted, setSubmitted] = useState(false);
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
+  const [sessionSize, setSessionSize] = useState<SessionSize>(DEFAULT_SESSION_SIZE);
   const [announcement, setAnnouncement] = useState("");
   const { trigger } = useWebHaptics();
   const questionTitleRef = useRef<HTMLHeadingElement>(null);
   const completeTitleRef = useRef<HTMLHeadingElement>(null);
-  const nextButtonRef = useRef<HTMLButtonElement>(null);
+  const feedbackRef = useRef<HTMLDivElement>(null);
   const prevIndexRef = useRef(0);
   const recordsRef = useRef<WordRecord[]>([]);
   const shouldReduceMotion = useReducedMotion();
   const item = bank[index];
-  const selectedOption = item?.options.find((option) => option.value === selected) ?? null;
-  const isCorrect = Boolean(selectedOption?.correct);
   const complete = bank.length > 0 && index >= bank.length;
-  const progress = bank.length ? (index + (submitted ? 1 : 0)) / bank.length : 0;
 
   const handleQuestionRef = useCallback(
     (node: HTMLHeadingElement | null) => {
@@ -62,23 +61,13 @@ export default function ExercisesPage() {
     [complete, shouldReduceMotion],
   );
 
-  const handleNextRef = useCallback(
-    (node: HTMLButtonElement | null) => {
-      nextButtonRef.current = node;
-      if (node && submitted) {
-        requestAnimationFrame(() => node.focus());
-      }
-    },
-    [submitted],
-  );
-
   useEffect(() => {
     let active = true;
     const timer = window.setTimeout(() => {
       void import("../data/records").then(({ records: loadedRecords }) => {
         if (!active) return;
         recordsRef.current = loadedRecords;
-        setBank(buildExerciseBank(loadedRecords, loadedRecords.length));
+        setBank(buildExerciseBank(loadedRecords, DEFAULT_SESSION_SIZE));
       });
     }, 0);
     return () => {
@@ -87,40 +76,17 @@ export default function ExercisesPage() {
     };
   }, []);
 
-  // Keyboard: 1-4 to select, Enter to submit/next
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (complete || !item) return;
-      if (!submitted && e.key >= "1" && e.key <= "4") {
-        const idx = Number(e.key) - 1;
-        const opt = item.options[idx];
-        if (opt) {
-          setSelected(opt.value);
-          submitAnswer(opt.value);
-        }
-      }
-      if (e.key === "Enter") {
-        if (!submitted && selected) submitAnswer();
-        else if (submitted) nextQuestion();
-      }
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [item, selected, submitted, complete, isCorrect, correctCount, wrongCount]);
+    if (!submitted) return;
+    requestAnimationFrame(() => {
+      const node = feedbackRef.current;
+      if (!node) return;
+      node.focus();
+      node.scrollIntoView({ block: "nearest", behavior: shouldReduceMotion ? "auto" : "smooth" });
+    });
+  }, [submitted, shouldReduceMotion]);
 
-  function shuffleAgain() {
-    const loadedRecords = recordsRef.current;
-    if (!loadedRecords.length) return;
-    setBank(buildExerciseBank(loadedRecords, loadedRecords.length));
-    setIndex(0);
-    setSelected(null);
-    setSubmitted(false);
-    setCorrectCount(0);
-    setWrongCount(0);
-    setAnnouncement("A new order of all 1,000 questions is ready.");
-  }
-
-  function submitAnswer(answer: string | null = selected) {
+  const submitAnswer = useCallback((answer: string | null = selected) => {
     const answerOption = item?.options.find((option) => option.value === answer);
     if (!answer || submitted || !item || !answerOption) return;
     const answerIsCorrect = answerOption.correct;
@@ -130,7 +96,46 @@ export default function ExercisesPage() {
     const nextWrongCount = wrongCount + (answerIsCorrect ? 0 : 1);
     if (answerIsCorrect) setCorrectCount(nextCorrectCount);
     else setWrongCount(nextWrongCount);
-    setAnnouncement(`${answerIsCorrect ? "Correct" : "Not quite"}. Score: ${nextCorrectCount} correct, ${nextWrongCount} wrong.`);
+    setAnnouncement(`Score: ${nextCorrectCount} correct, ${nextWrongCount} wrong.`);
+  }, [correctCount, item, selected, submitted, trigger, wrongCount]);
+
+  // Keyboard: 1-4 selects an option. Enter checks only when focus is not already on a control.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (complete || !item) return;
+      const target = e.target instanceof HTMLElement ? e.target : null;
+      if (target?.closest("button, a, input, select, textarea, [contenteditable='true']")) return;
+      if (!submitted && e.key >= "1" && e.key <= "4") {
+        const idx = Number(e.key) - 1;
+        const opt = item.options[idx];
+        if (opt) {
+          setSelected(opt.value);
+        }
+      }
+      if (!submitted && e.key === "Enter" && selected) {
+        e.preventDefault();
+        submitAnswer();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [item, selected, submitted, complete, submitAnswer]);
+
+  function startRound(size: SessionSize) {
+    const loadedRecords = recordsRef.current;
+    if (!loadedRecords.length) return;
+    setSessionSize(size);
+    setBank(buildExerciseBank(loadedRecords, size));
+    setIndex(0);
+    setSelected(null);
+    setSubmitted(false);
+    setCorrectCount(0);
+    setWrongCount(0);
+    setAnnouncement(`A new ${size.toLocaleString()}-question round is ready.`);
+  }
+
+  function shuffleAgain() {
+    startRound(sessionSize);
   }
 
   function nextQuestion() {
@@ -138,7 +143,7 @@ export default function ExercisesPage() {
       setIndex(bank.length);
       setSelected(null);
       setSubmitted(false);
-      setAnnouncement("You reached all 1,000 questions. Shuffle again to start a new round.");
+      setAnnouncement(`You reached all ${bank.length.toLocaleString()} questions. Shuffle again to start a new round.`);
       return;
     }
     setIndex((current) => current + 1);
@@ -150,12 +155,10 @@ export default function ExercisesPage() {
   return (
     <AppShell>
       <main id="main-content" className="page-stack exercise-page">
+        <h1 className="sr-only">Exercises</h1>
         <p className="sr-only" role="status" aria-live="polite">{announcement}</p>
 
-        <section className="section-heading" aria-labelledby="exercise-title">
-          <div className="exercise-intro">
-            <h1 id="exercise-title">Exercises</h1>
-          </div>
+        <section className="section-heading exercise-toolbar" aria-label="Exercise round controls">
           <div className="score-card" role="group" aria-label={`Round score: ${correctCount} correct, ${wrongCount} wrong`}>
             <span className="score-card__caption" aria-hidden="true">Score</span>
             <div className="score-card__item score-card__item--correct" aria-hidden="true">
@@ -187,6 +190,20 @@ export default function ExercisesPage() {
               </motion.span>
             </div>
           </div>
+          <div className="session-picker" role="group" aria-label="Round length">
+            <span className="session-picker__label">Round</span>
+            {SESSION_SIZES.map((size) => (
+              <button
+                key={size}
+                type="button"
+                className={size === sessionSize ? "session-picker__button session-picker__button--active" : "session-picker__button"}
+                aria-pressed={size === sessionSize}
+                onClick={() => startRound(size)}
+              >
+                {size === 1000 ? "All 1,000" : size}
+              </button>
+            ))}
+          </div>
         </section>
 
         {!bank.length ? (
@@ -202,10 +219,10 @@ export default function ExercisesPage() {
             className="empty-state exercise-complete"
             aria-labelledby="exercise-complete-title"
           >
-            <h2 id="exercise-complete-title" ref={handleCompleteRef} tabIndex={-1}>All 1,000 questions answered.</h2>
+            <h2 id="exercise-complete-title" ref={handleCompleteRef} tabIndex={-1}>All {bank.length.toLocaleString()} questions answered.</h2>
             <p>You made it through this temporary question order with {correctCount} correct and {wrongCount} wrong answers. Reloading or reshuffling starts clean.</p>
             <div className="empty-state-action">
-              <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
+              <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle {bank.length.toLocaleString()} again <span aria-hidden="true">↗</span></button>
               <Link className="button button--secondary" href="/">Return to cards</Link>
             </div>
           </motion.section>
@@ -221,19 +238,9 @@ export default function ExercisesPage() {
                 className="exercise-card"
                 aria-labelledby="question-title"
               >
-                <div className="exercise-progress" aria-hidden="true">
-                  <motion.div
-                    className="exercise-progress__fill"
-                    initial={false}
-                    animate={{ scaleX: progress }}
-                    transition={{ duration: 0.55, ease: easeOut }}
-                    style={{ scaleX: progress }}
-                  />
-                </div>
-
                 <div className="exercise-card__header">
                   <span>
-                    Question <strong>{String(index + 1).padStart(4, "0")}</strong> · {bank.length.toLocaleString()}
+                    Question <strong>{index + 1}</strong> / {bank.length.toLocaleString()}
                   </span>
                 </div>
 
@@ -251,8 +258,7 @@ export default function ExercisesPage() {
                   </motion.h2>
                 </div>
 
-                <fieldset className="choice-group">
-                  <legend className="sr-only">{item.instruction}</legend>
+                <fieldset className="choice-group" aria-label="Answer choices">
                   <div className="choice-grid">
                     {item.options.map((option, i) => {
                       const optionId = "exercise-option-" + item.record.rank + "-" + option.value;
@@ -281,7 +287,6 @@ export default function ExercisesPage() {
                             onChange={() => {
                               if (submitted) return;
                               setSelected(option.value);
-                              submitAnswer(option.value);
                             }}
                             disabled={submitted}
                           />
@@ -295,36 +300,22 @@ export default function ExercisesPage() {
                   </div>
                 </fieldset>
 
-
-
-                {submitted && <div className="exercise-actions">
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.button
-                      key="next"
-                      ref={handleNextRef}
-                      type="button"
-                      className="button button-dark"
-                      onClick={nextQuestion}
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2, ease: easeOut }}
-                      whileTap={{ scale: 0.97 }}
-                      onAnimationComplete={() => {
-                        // Fallback for reduced-motion where initial is false and callback ref already focused.
-                        if (submitted) handleNextRef(nextButtonRef.current);
-                      }}
-                    >
-                      {index + 1 >= bank.length ? "Finish round" : "Next question →"}
-                    </motion.button>
-                  </AnimatePresence>
-                </div>}
+                {!submitted && (
+                  <div className="exercise-actions exercise-actions--check">
+                    <button className="button button-dark" type="button" disabled={!selected} onClick={() => submitAnswer()}>
+                      Check answer
+                    </button>
+                  </div>
+                )}
 
                 <AnimatePresence initial={false}>
                   {submitted && (
                     <motion.div
                       key="feedback"
                       className="exercise-feedback"
+                      ref={feedbackRef}
+                      tabIndex={-1}
+                      aria-label={`Answer context for ${item.prompt}`}
                       initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, height: 0 }}
@@ -336,7 +327,7 @@ export default function ExercisesPage() {
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.14, ease: easeOut }}
                       >
-                        <FeedbackPanel correct={isCorrect} answer={item.answer} />
+                        <p className="feedback-explanation">{item.record.explanation}</p>
                         <div style={{ marginTop: 16 }}>
                           <WordExamples record={item.record} />
                         </div>
@@ -344,12 +335,28 @@ export default function ExercisesPage() {
                     </motion.div>
                   )}
                 </AnimatePresence>
+
+                {submitted && (
+                  <div className="exercise-actions exercise-actions--next">
+                    <motion.button
+                      key="next"
+                      type="button"
+                      className="button button-dark"
+                      onClick={nextQuestion}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, ease: easeOut }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      {index + 1 >= bank.length ? "Finish round" : "Next question →"}
+                    </motion.button>
+                  </div>
+                )}
               </motion.section>
             </AnimatePresence>
           </div>
         ) : null}
       </main>
-      <Footer />
     </AppShell>
   );
 }
