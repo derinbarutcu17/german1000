@@ -224,7 +224,7 @@ const curated: Record<string, CuratedNote> = {
   innerhalb: {
     gloss: "within",
     kind: "function",
-    explanation: "A preposition meaning “within”; it sets a boundary in time or space.",
+    explanation: "A preposition.",
     reviewStatus: "editor-reviewed",
   },
   Jahren: {
@@ -234,6 +234,146 @@ const curated: Record<string, CuratedNote> = {
     explanation: "The dative plural form of Jahr, used for a period of years.",
     reviewStatus: "editor-reviewed",
   },
+  Arm: {
+    gloss: "arm",
+    kind: "noun",
+    usageNote: "The capitalized form means the body part. The lowercase adjective arm means poor.",
+    reviewStatus: "editor-reviewed",
+  },
+  griff: {
+    gloss: "grabbed; reached",
+    kind: "verb",
+    usageNote: "Griff is the past tense of greifen. It is not the noun Grip or handle.",
+    reviewStatus: "editor-reviewed",
+  },
+  frage: {
+    kind: "verb",
+    usageNote: "Frage is the first-person form of fragen, to ask. It is not the noun question.",
+    reviewStatus: "editor-reviewed",
+  },
+  tat: {
+    kind: "verb",
+    usageNote: "Tat is the past tense of tun, did. It is not the noun deed.",
+    reviewStatus: "editor-reviewed",
+  },
+  tritt: {
+    kind: "verb",
+    usageNote: "Tritt is a present-tense form of treten, to step or kick. It is not the noun kick.",
+    reviewStatus: "editor-reviewed",
+  },
+  // Lowercase corpus forms whose glosses are clearly nouns/adjectives — the
+  // classifier can't see corpus casing, so fix the word-type labels here.
+  leben: { kind: "noun" },
+  sorgen: { kind: "noun" },
+  wand: { kind: "noun" },
+  unterschied: { kind: "noun" },
+  liebe: { kind: "noun" },
+  stelle: { kind: "noun" },
+  begriff: { kind: "noun" },
+  mal: { kind: "noun" },
+  recht: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Jeder hat das Recht, frei seine Meinung zu sagen.", en: "Everyone has the right to say their opinion freely." },
+      { level: "B2", de: "Ohne Anwalt kann man sein Recht schwer durchsetzen.", en: "Without a lawyer it is hard to assert one's rights." },
+      { level: "C1", de: "Das neue Gesetz schützt das Recht auf Privatsphäre im Netz.", en: "The new law protects the right to privacy online." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  fest: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Zum Geburtstag gab es ein großes Fest im Garten.", en: "There was a big celebration in the garden for the birthday." },
+      { level: "B2", de: "Die Stadt feiert jedes Jahr ein internationales Fest.", en: "The city hosts an international festival every year." },
+      { level: "C1", de: "Beim Fest hielten die Gastgeber lange Reden auf die Gäste.", en: "At the festival the hosts gave long speeches to the guests." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  junge: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Der Junge lernt schnell Radfahren.", en: "The boy quickly learns to ride a bike." },
+      { level: "B2", de: "Ein kleiner Junge fragt nach dem Weg zum Zoo.", en: "A little boy asks for the way to the zoo." },
+      { level: "C1", de: "Der Junge las das dicke Buch, ohne ein einziges Wort zu überspringen.", en: "The boy read the thick book without skipping a single word." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  wert: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Gesundheit hat für mich den höchsten Wert.", en: "For me, health has the highest value." },
+      { level: "B2", de: "Mit den Jahren verlor das alte Gerät deutlich an Wert.", en: "Over the years the old device clearly lost value." },
+      { level: "C1", de: "Der Wert des Gemäldes ließ sich kaum noch in Geld bemessen.", en: "The value of the painting could hardly be measured in money anymore." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  schritt: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Er machte einen großen Schritt über den Bach.", en: "He took a big step over the stream." },
+      { level: "B2", de: "Er ging Schritt für Schritt die steile Treppe hinauf.", en: "He went up the steep staircase step by step." },
+      { level: "C1", de: "Der letzte Schritt zur eigenen Firma war der schwerste von allen.", en: "The last step toward owning the company was the hardest of all." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  ehe: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Die Ehe der beiden hielt fünfzig Jahre.", en: "The couple's marriage lasted fifty years." },
+      { level: "B2", de: "In einer guten Ehe hört man einander wirklich zu.", en: "In a good marriage you truly listen to each other." },
+      { level: "C1", de: "Das Gesetz regelte die Ehe lange ausschließlich zwischen Mann und Frau.", en: "For a long time the law defined marriage exclusively between a man and a woman." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  schloss: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Das alte Schloss liegt auf einem Hügel über dem Fluss.", en: "The old castle sits on a hill above the river." },
+      { level: "B2", de: "Wir besichtigten das Schloss und den großen Garten dahinter.", en: "We visited the castle and the big garden behind it." },
+      { level: "C1", de: "Im Schloss fanden früher rauschende Feste mit Musikern aus ganz Europa statt.", en: "In the castle there used to be lavish festivities with musicians from all over Europe." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  rede: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Seine Rede dauerte keine zehn Minuten.", en: "His speech lasted less than ten minutes." },
+      { level: "B2", de: "Nach der Rede des Präsidenten gab es viele Fragen.", en: "After the president's speech there were many questions." },
+      { level: "C1", de: "Die Rede wurde im ganzen Land live im Fernsehen übertragen.", en: "The speech was broadcast live on television across the whole country." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  verstand: {
+    kind: "noun",
+    examples: [
+      { level: "A2", de: "Er hat viel Verstand und trifft kluge Entscheidungen.", en: "He has a lot of understanding and makes wise decisions." },
+      { level: "B2", de: "Mit achtzig Jahren hatte sie noch einen klaren Verstand.", en: "At eighty she still had a sharp mind." },
+      { level: "C1", de: "Vor Wut verlor er beinahe den Verstand.", en: "In anger he nearly lost his mind." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  armen: {
+    kind: "adjective",
+    examples: [
+      { level: "A2", de: "Die armen Kinder brauchen neue Schuhe.", en: "The poor children need new shoes." },
+      { level: "B2", de: "Er fütterte jeden Tag die armen Katzen hinter dem Haus.", en: "Every day he fed the poor cats behind the house." },
+      { level: "C1", de: "Im Winter sorgte die Stadt besonders um die armen Alten in den Wohnungen.", en: "In winter the city especially cared for the poor elderly in their apartments." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  inneren: {
+    kind: "adjective",
+    examples: [
+      { level: "A2", de: "Die inneren Räume des Hauses sind sehr kühl.", en: "The inner rooms of the house are very cool." },
+      { level: "B2", de: "Trotz ihrer Ruhe zeigte sie nie ihre inneren Zweifel.", en: "Despite her calm she never showed her inner doubts." },
+      { level: "C1", de: "Die inneren Mauern der alten Festung blieben über Jahrhunderte fast unberührt.", en: "The inner walls of the old fortress remained almost untouched for centuries." },
+    ],
+    reviewStatus: "editor-reviewed",
+  },
+  alten: { kind: "adjective" },
+  deutschen: { kind: "adjective" },
+  weg: { kind: "adverb" },
+  los: { kind: "other" },
 };
 
 const functionWords = new Set("aber ab alle als also am an auch auf aus bei beim bis dadurch damit dann dass daß da dabei davor danach darum das dem den denn der des die dies diese dieser diesem dieses doch durch ein eine einem einen einer eines er es für gegen ich im in ja kein keine kann können mit mich mir nach nicht noch nur oder ohne so sondern über um und unter von vor war was weil wenn wie wir zu zum zur".split(" "));

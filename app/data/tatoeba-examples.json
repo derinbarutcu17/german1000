@@ -4056,18 +4056,14 @@
       "sourceId": 329
     },
     {
-      "de": "Ich gebe zu, dass dies vielleicht nicht der beste Weg ist, es zu tun.",
-      "en": "I admit this may not be the best way of doing it.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/338301",
-      "sourceId": 338301
+      "de": "Sobald die Sonne schien, war der Schnee weg.",
+      "en": "As soon as the sun shone, the snow was gone.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Es wäre besser gewesen, wenn du ihn gefragt hättest, welchen Weg du nehmen sollst.",
-      "en": "You had better ask him which way to take.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/346978",
-      "sourceId": 346978
+      "de": "Sie lief einfach weg, ohne ein Wort zu sagen.",
+      "en": "She simply walked away without saying a word.",
+      "sourceKind": "context-template"
     }
   ],
   "heute": [
@@ -4362,11 +4358,9 @@
       "sourceId": 545
     },
     {
-      "de": "Ist es notwendig, das menschliche Wissen durch die Erforschung des Weltraumes auszuweiten?",
-      "en": "Is it necessary to expand human knowledge with space exploration?",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/945",
-      "sourceId": 945
+      "de": "Ich will nicht wissen, was die Leute über mich denken.",
+      "en": "I do not want to know what people think about me.",
+      "sourceKind": "context-template"
     }
   ],
   "stand": [
@@ -4463,11 +4457,9 @@
   ],
   "frage": [
     {
-      "de": "Wenn Sie die Antwort dieser Frage kennen, bitte sagen Sie sie mir.",
-      "en": "If you know the answer to this question, please tell me.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/353066",
-      "sourceId": 353066
+      "de": "Ich frage lieber noch einmal nach, bevor ich handle.",
+      "en": "I would rather ask again before I act.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Ich frage mich ob er mir seine Gitarre in den Ferien borgen könnte.",
@@ -7782,11 +7774,9 @@
       "sourceId": 643272
     },
     {
-      "de": "Ich pflege des Abends immer einen Spaziergang um den nahegelegenen Teich zu unternehmen.",
-      "en": "I make it a rule to take a walk around the nearby pond in the evening.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/2422201",
-      "sourceId": 2422201
+      "de": "Das junge Unternehmen sucht bald fünf neue Mitarbeiter.",
+      "en": "The young company will soon be looking for five new employees.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Seine Karriere im Unternehmen war schon zu Ende, bevor sie begonnen hatte.",
@@ -10466,18 +10456,14 @@
   ],
   "tat": [
     {
-      "de": "Einmal in meinem Leben tue ich eine gute Tat... Und es bringt nichts.",
-      "en": "For once in my life I'm doing a good deed... And it is useless.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/5575",
-      "sourceId": 5575
+      "de": "Es tat ihr leid, dass sie ihn enttäuscht hatte.",
+      "en": "She was sorry that she had disappointed him.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Er setzte den Plan, den er sorgfältig aufgestellt hatte, in die Tat um.",
-      "en": "He carried out the plan he had made in detail.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/457100",
-      "sourceId": 457100
+      "de": "Gestern tat er den ganzen Tag nichts als lesen.",
+      "en": "Yesterday he did nothing but read all day.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Roger rutschte auf dem Eis aus und tat sich am Bein weh.",
@@ -10496,11 +10482,9 @@
       "sourceId": 635367
     },
     {
-      "de": "Wie lange dauert es, um von Tokio nach Los Angeles zu fliegen?",
-      "en": "How long does it take to fly from Tokyo to Los Angeles?",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/772260",
-      "sourceId": 772260
+      "de": "Los, beeil dich, sonst verpassen wir den Zug!",
+      "en": "Come on, hurry up, or we will miss the train!",
+      "sourceKind": "context-template"
     },
     {
       "de": "Er ging los, um sich einen Film anzuschauen. Wie war der Film? Gut.",
@@ -12191,11 +12175,9 @@
   ],
   "verhalten": [
     {
-      "de": "Tom entschloss sich, mit dem Trinken aufzuhören und sein Verhalten zu bessern.",
-      "en": "Tom decided to stop drinking and reform his behavior.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/756004",
-      "sourceId": 756004
+      "de": "Er lernte, sich in der Klasse ruhiger zu verhalten.",
+      "en": "He learned to behave more calmly in class.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Denken Sie daran, dass Sie hier zu Gast sind und sich entsprechend verhalten sollten.",
@@ -12205,11 +12187,9 @@
       "sourceId": 784679
     },
     {
-      "de": "Ich hätte nicht gedacht, dass sein Verhalten auf so ein unmögliches Niveau absinkt.",
-      "en": "I didn't expect his behavior to descend to such a disagreeable level.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/943248",
-      "sourceId": 943248
+      "de": "So darfst du dich deinen Eltern gegenüber nicht verhalten.",
+      "en": "You must not behave like that toward your parents.",
+      "sourceKind": "context-template"
     }
   ],
   "Sprache": [
@@ -13226,11 +13206,9 @@
   ],
   "folgen": [
     {
-      "de": "Laut einer Studie sterben jährlich 53000 Amerikaner an den Folgen von Passivrauchen.",
-      "en": "A study reports that 53,000 Americans die each year as a result of secondhand smoke.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/364484",
-      "sourceId": 364484
+      "de": "Kannst du mir bis zur Haustür folgen?",
+      "en": "Can you follow me as far as the front door?",
+      "sourceKind": "context-template"
     },
     {
       "de": "Wenn Sie die Medizin einnehmen, folgen Sie genau der auf der Flasche abgedruckten Gebrauchsanweisung.",
@@ -13240,11 +13218,9 @@
       "sourceId": 454726
     },
     {
-      "de": "Die meisten Raucher versuchen, nicht an die erschreckenden Folgen ihrer Sucht zu denken.",
-      "en": "Most smokers try not to think about the awful consequences of their addiction.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/655555",
-      "sourceId": 655555
+      "de": "Wir werden Ihnen überallhin folgen.",
+      "en": "We will follow you anywhere.",
+      "sourceKind": "context-template"
     }
   ],
   "antwortete": [
@@ -13479,18 +13455,14 @@
   ],
   "Arm": [
     {
-      "de": "Arm ist nicht, wer zu wenig besitzt, sondern, wer zu viel haben möchte.",
-      "en": "Poor is not the one who has too little, but the one who wants too much.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/387",
-      "sourceId": 387
+      "de": "Er trug die Kiste den ganzen Weg unter dem Arm.",
+      "en": "He carried the box under his arm the whole way.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Es spielt für mich keine Rolle, ob du arm oder reich bist.",
-      "en": "It makes no difference to me whether you are rich or poor.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/369953",
-      "sourceId": 369953
+      "de": "Sie legte den Arm um ihre Freundin und tröstete sie.",
+      "en": "She put her arm around her friend and comforted her.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Nach einer Weile kam er mit einem Wörterbuch unter dem Arm zurück.",
@@ -13985,18 +13957,14 @@
       "sourceId": 667666
     },
     {
-      "de": "Als ich dich das erste Mal besucht habe, habe ich mich verfahren.",
-      "en": "I got lost when I visited you for the first time.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/1808085",
-      "sourceId": 1808085
+      "de": "Wir haben ein neues Verfahren eingeführt, damit alles schneller geht.",
+      "en": "We introduced a new procedure so that everything is faster.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Wir haben uns nicht verfahren. Ich weiß, wo wir sind.",
-      "en": "We're not lost. I know where we are.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/5379087",
-      "sourceId": 5379087
+      "de": "Ohne dieses Verfahren darf niemand die Halle betreten.",
+      "en": "Nobody may enter the hall without this procedure.",
+      "sourceKind": "context-template"
     }
   ],
   "kamen": [
@@ -14646,25 +14614,19 @@
   ],
   "wagen": [
     {
-      "de": "Scheinbar bin ich hier das fünfte Rad am Wagen, ich sollte besser gehen.",
-      "en": "Seems like I'm just playing gooseberry here. I should go.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/690815",
-      "sourceId": 690815
+      "de": "Mit zitternden Händen werde ich es wagen.",
+      "en": "With trembling hands I will dare it.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Ich bin hier wohl das dritte Rad am Wagen. Ich werde hier nicht gebraucht.",
-      "en": "Seems like I'm the third wheel here. I should go.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/786644",
-      "sourceId": 786644
+      "de": "Sie fürchtete sich, wollte es aber trotzdem wagen.",
+      "en": "She was afraid but still wanted to dare it.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Ein kalifornischer Polizist winkte einen Wagen heraus und sprach mit dem Fahrer.",
-      "en": "A Californian policeman pulled a car over and spoke to the driver.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/1211647",
-      "sourceId": 1211647
+      "de": "Manchmal muss man einfach alles wagen.",
+      "en": "Sometimes you just have to risk everything.",
+      "sourceKind": "context-template"
     }
   ],
   "einzige": [
@@ -17575,11 +17537,9 @@
       "sourceId": 537688
     },
     {
-      "de": "Köllnflocken und 'nen Jägermeister zum Frühstück haut auf Dauer jeden aus den Socken.",
-      "en": "In the long run oat flakes with advocaat for breakfast will knock everybody's socks off.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/666959",
-      "sourceId": 666959
+      "de": "Im Sommer braucht die Haut besonderen Schutz vor der Sonne.",
+      "en": "In summer the skin needs special protection from the sun.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Bis spät in die Nacht aufzubleiben ist sehr schlecht für die Haut.",
@@ -17614,11 +17574,9 @@
   ],
   "griff": [
     {
-      "de": "Der Manager der Baseballmannschaft ist sehr streng. Er hat die Spieler gut im Griff.",
-      "en": "The manager of the baseball team is very strict. He is good at keeping the players in hand.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/2357818",
-      "sourceId": 2357818
+      "de": "Ohne zu zögern, griff er nach dem Schlüssel.",
+      "en": "Without hesitating, he reached for the key.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Gegen besseres Wissen griff er nicht ein, sondern ließ den Dingen ihren Lauf.",
@@ -17628,11 +17586,9 @@
       "sourceId": 2629059
     },
     {
-      "de": "Breite deine Flügel aus und du wirst sehen: Du hast dein Schicksal im Griff.",
-      "en": "Spread your wings and you will see: your destiny will be under your control.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/6214761",
-      "sourceId": 6214761
+      "de": "Sie griff zum Hörer und wählte unsere Nummer.",
+      "en": "She picked up the receiver and dialed our number.",
+      "sourceKind": "context-template"
     }
   ],
   "Schwester": [
@@ -20750,18 +20706,14 @@
       "sourceId": 1245794
     },
     {
-      "de": "Tom spielt für gewöhnlich wenigstens ein Schlagzeugsolo, wenn seine Band ein Konzert gibt.",
-      "en": "Tom usually plays a drum solo at least once every time his band gives a concert.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/2050896",
-      "sourceId": 2050896
+      "de": "Er wickelte das Band ab und klebte das Paket zu.",
+      "en": "He unwound the tape and taped the parcel shut.",
+      "sourceKind": "context-template"
     },
     {
-      "de": "Der Reiter band eine Wasserflasche vom Sattel los und trank einige Schlucke.",
-      "en": "The rider untied a water bottle from his saddle and gulped down a few mouthfuls.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/4894580",
-      "sourceId": 4894580
+      "de": "Sie hielt den Stapel Papiere mit einem breiten Band zusammen.",
+      "en": "She held the stack of papers together with a wide band.",
+      "sourceKind": "context-template"
     }
   ],
   "denke": [
@@ -22432,11 +22384,9 @@
   "gleiche": [],
   "tritt": [
     {
-      "de": "Ein Faustschlag ist nur ein Faustschlag. Ein Tritt ist nur ein Tritt.",
-      "en": "A punch is just a punch. A kick is just a kick.",
-      "sourceKind": "tatoeba",
-      "sourceRef": "https://tatoeba.org/en/sentences/show/511418",
-      "sourceId": 511418
+      "de": "Er tritt den Ball über den Zaun und lacht.",
+      "en": "He kicks the ball over the fence and laughs.",
+      "sourceKind": "context-template"
     },
     {
       "de": "Tom tritt an drei Abenden in der Woche in einem Jazz-Klub auf.",

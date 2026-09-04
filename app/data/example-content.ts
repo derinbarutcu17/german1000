@@ -269,7 +269,7 @@ const verbSpecific: Record<string, ExampleSeed[]> = {
   lassen: [template("Wir lassen das Fenster offen.", "We are leaving the window open."), template("Lass uns später sprechen.", "Let us talk later."), template("Sie lässt den Schlüssel auf dem Tisch.", "She leaves the key on the table.")],
   wissen: [template("Ich möchte die Antwort wissen.", "I would like to know the answer."), template("Wir wissen noch nicht, wann der Zug kommt.", "We do not know yet when the train is coming."), template("Niemand kann alles wissen.", "Nobody can know everything.")],
   arbeiten: [template("Wir arbeiten heute im Büro.", "We are working in the office today."), template("Sie arbeitet gern mit Kindern.", "She likes working with children."), template("Nach dem Essen arbeiten wir weiter.", "We will continue working after the meal.")],
-  lernen: [template("Ich lerne jeden Tag Deutsch.", "I learn German every day."), template("Die Kinder lernen schnell.", "The children learn quickly."), template("Wir lernen aus unseren Fehlern.", "We learn from our mistakes.")],
+  lernen: [template("Es ist nie zu spät, Deutsch zu lernen.", "It is never too late to learn German."), template("Die Kinder lernen schnell.", "The children learn quickly."), template("Wir lernen aus unseren Fehlern.", "We learn from our mistakes.")],
   lesen: [template("Ich lese gerade ein gutes Buch.", "I am reading a good book right now."), template("Sie liest die Nachricht noch einmal.", "She is reading the message again."), template("Wir lesen gern am Abend.", "We like reading in the evening.")],
   schreiben: [template("Ich schreibe dir morgen.", "I will write to you tomorrow."), template("Sie schreibt einen kurzen Brief.", "She is writing a short letter."), template("Wir schreiben die Adresse auf.", "We are writing down the address.")],
   sprechen: [template("Wir sprechen morgen darüber.", "We will talk about it tomorrow."), template("Sie spricht sehr leise.", "She speaks very quietly."), template("Die beiden sprechen über ihre Reise.", "The two of them are talking about their trip.")],
@@ -281,13 +281,13 @@ function capitalise(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function cleanSourceExamples(word: string): ExampleSeed[] {
+function cleanSourceExamples(word: string, kind: WordKind): ExampleSeed[] {
   const candidates = (tatoebaExamples as Record<string, Example[]>)[word] ?? [];
   const obscureRe = /(?:Portier|Koffer|häufiges Wort|hörst oder liest|prüfe die Funktion|Achte auf den Kontext)/iu;
   const scored = candidates
     .filter((example) => {
       const wordCount = example.de.trim().split(/\s+/u).length;
-      return wordCount >= 5 && wordCount <= 26 && hasExactWord(example.de, word) && !obscureRe.test(example.de);
+      return wordCount >= 5 && wordCount <= 26 && wordUsedAsRecord(example.de, word, usedAsNounKind(kind)) && !obscureRe.test(example.de);
     })
     .map((example) => {
       const wc = example.de.trim().split(/\s+/u).length;
@@ -297,13 +297,37 @@ function cleanSourceExamples(word: string): ExampleSeed[] {
       return { example, score, wc };
     })
     .sort((a, b) => a.score - b.score || a.wc - b.wc)
-    .map(({ example }) => ({ ...example, sourceKind: "tatoeba" as const }));
+    .map(({ example }) => ({ ...example, sourceKind: example.sourceKind ?? ("tatoeba" as const) }));
   return scored;
 }
 
 function hasExactWord(sentence: string, word: string) {
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(?:^|[^\\p{L}\\p{M}\\p{N}])${escaped}(?=$|[^\\p{L}\\p{M}\\p{N}])`, "iu").test(sentence);
+}
+
+// The record word must appear in the sentence in a casing consistent with its
+// word type: nouns and names need an uppercase occurrence (German nouns are
+// capitalized); lowercase forms (verbs, adjectives, function words) need a
+// lowercase occurrence or a sentence-initial capital. Stops homographs
+// bleeding across senses ("verfahren" the verb vs "das Verfahren" the noun).
+export function wordUsedAsRecord(sentence: string, word: string, asNoun = false) {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp(`(?:^|[^\\p{L}\\p{M}\\p{N}])(${escaped})(?=$|[^\\p{L}\\p{M}\\p{N}])`, "giu");
+  const needUpper = asNoun || /^[A-ZÄÖÜ]/.test(word);
+  for (const match of sentence.matchAll(re)) {
+    const index = (match.index ?? 0) + (match[0].length - match[1].length);
+    const first = match[1].slice(0, 1);
+    const isUpper = /^[A-ZÄÖÜ]/.test(first);
+    const before = sentence.slice(0, index).trimEnd();
+    const sentenceStart = before === "" || /[.!?;:]\s*$/.test(before);
+    if (needUpper ? isUpper : !isUpper || sentenceStart) return true;
+  }
+  return false;
+}
+
+function usedAsNounKind(kind: WordKind) {
+  return kind === "noun" || kind === "name";
 }
 
 function nounExamples(word: string, noun: NounInfo): ExampleSeed[] {
@@ -473,9 +497,10 @@ export function fallbackForLevel(
   kind: WordKind,
   noun?: NounInfo,
   examples: readonly Example[] = [],
+  exclude: ReadonlySet<string> = new Set(),
 ): ExampleSeed {
   const levelIndex = level === "A2" ? 0 : level === "B2" ? 1 : 2;
-  const exactNatural = examples.filter((example) => hasExactWord(example.de, word) && !isMetaExample(example));
+  const exactNatural = examples.filter((example) => wordUsedAsRecord(example.de, word, usedAsNounKind(kind)) && !isMetaExample(example) && !exclude.has(example.de));
   const sameLevel = exactNatural.find((example) => example.level === level);
   if (sameLevel) return { ...sameLevel, sourceKind: sameLevel.sourceKind };
 
@@ -483,7 +508,7 @@ export function fallbackForLevel(
   if (naturalCandidate) return { ...naturalCandidate, sourceKind: naturalCandidate.sourceKind };
 
   const generated = specialExamples[word] ?? generatedExamplesForRole(word, kind, noun);
-  const generatedCandidate = generated[levelIndex] ?? generated[generated.length - 1];
+  const generatedCandidate = generated.find((candidate) => !exclude.has(candidate.de) && wordUsedAsRecord(candidate.de, word, usedAsNounKind(kind)));
   if (generatedCandidate && !isMetaExample(generatedCandidate)) return generatedCandidate;
 
   return template(`Heute sehe ich ${word}.`, `Today I see ${word}.`);
@@ -498,10 +523,12 @@ function attachLevels(examples: ExampleSeed[]): Example[] {
 }
 
 function ensureCefrBands(word: string, kind: WordKind, noun: NounInfo | undefined, examples: Example[]): Example[] {
+  const used = new Set(examples.filter((ex) => wordUsedAsRecord(ex.de, word, usedAsNounKind(kind)) && !isMetaExample(ex)).map((ex) => ex.de));
   let fixed = examples.map((ex) => {
     const lvl = ex.level as "A2" | "B2" | "C1";
-    if (hasExactWord(ex.de, word) && !isMetaExample(ex)) return ex;
-    const fallback = fallbackForLevel(word, lvl, kind, noun, examples);
+    if (wordUsedAsRecord(ex.de, word, usedAsNounKind(kind)) && !isMetaExample(ex)) return ex;
+    const fallback = fallbackForLevel(word, lvl, kind, noun, examples, used);
+    used.add(fallback.de);
     return { ...fallback, level: lvl } as Example;
   });
   // Re-sort to guarantee monotonic A2 ≤ B2 ≤ C1 after fallback replacement
@@ -517,22 +544,28 @@ export function buildExamples(word: string, kind: WordKind, noun?: NounInfo): Ex
     }));
     return ensureCefrBands(word, kind, noun, leveled);
   }
-  const sourced = cleanSourceExamples(word);
+  const sourced = cleanSourceExamples(word, kind);
   if (sourced.length >= 3) {
     const leveled = attachLevels(sourced);
     return ensureCefrBands(word, kind, noun, leveled);
   }
   const generated = generatedExamplesForRole(word, kind, noun);
   const merged = [...sourced, ...generated];
-  const unique = new Map(merged.map((example) => [example.de, example]));
-  return ensureCefrBands(word, kind, noun, attachLevels([...unique.values()]));
+  const unique = [...new Map(merged.map((example) => [example.de, example])).values()];
+  const usable = unique.filter((example) => wordUsedAsRecord(example.de, word, usedAsNounKind(kind)) && !isMetaExample(example));
+  const pool = usable.length >= 3 ? usable : unique;
+  return ensureCefrBands(word, kind, noun, attachLevels(pool));
 }
 
 export function buildExplanation(word: string, kind: WordKind, gloss: string, noun?: NounInfo) {
-  const meaning = gloss.split(/[;,/]/u)[0].trim();
-  if (word === "innerhalb") return "A preposition meaning “within”; it sets a boundary in time or space.";
-  if (noun) return `A ${noun.number === "plural" ? "plural " : ""}noun meaning “${meaning}”.`;
-  if (kind === "verb") return `A verb form meaning “${meaning}”.`;
-  if (kind === "function") return `A function word used to connect, point, or qualify the surrounding sentence.`;
-  return `A context-dependent form meaning “${meaning}”.`;
+  if (word === "innerhalb") return "A preposition.";
+  if (noun) return `A ${noun.number === "plural" ? "plural " : ""}noun.`;
+  if (kind === "noun") return "A noun.";
+  if (kind === "verb") return "A verb form.";
+  if (kind === "function") return "A function word.";
+  if (kind === "name") return "A name.";
+  if (kind === "number") return "A number.";
+  if (kind === "adverb") return "An adverb.";
+  if (kind === "adjective") return "An adjective.";
+  return "A word.";
 }
