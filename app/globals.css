@@ -1606,6 +1606,35 @@ summary {
     animation: none;
   }
 }
+/* Back veil: the unveil in reverse, bottom to top — the action bar veils
+   first, the gloss last. page.tsx keeps the back mounted at full height
+   until the veil finishes, then unmounts. */
+.flashcard--revealed.flashcard--collapsing .flashcard-back > * {
+  animation: back-veil 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(1) { animation-delay: 0.25s; }
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(2) { animation-delay: 0.2s; }
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(3) { animation-delay: 0.15s; }
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(4) { animation-delay: 0.1s; }
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(5) { animation-delay: 0.05s; }
+.flashcard--revealed.flashcard--collapsing .flashcard-back > :nth-child(6) { animation-delay: 0s; }
+@keyframes back-veil {
+  from {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flashcard--revealed.flashcard--collapsing .flashcard-back > * {
+    animation: none;
+  }
+}
 .flashcard-back,
 .flashcard--complete,
 .exercise-card h2 {

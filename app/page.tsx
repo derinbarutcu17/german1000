@@ -13,6 +13,9 @@ import { displayWord } from "./lib/word-utils";
 
 const INITIAL_CARD: WordRecord = staticRecords[0];
 
+// Must cover the whole bottom-to-top veil: gloss starts at 0.25s, runs 0.35s.
+const COLLAPSE_MS = 620;
+
 function focusElement(element: HTMLElement | null) {
   if (!element) return;
   // Focus without the browser's instant jump, then only nudge the page if
@@ -33,6 +36,8 @@ export default function FlashcardsPage() {
   const [deck, setDeck] = useState<WordRecord[]>(() => [INITIAL_CARD]);
   const [position, setPosition] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  const [collapsing, setCollapsing] = useState(false);
+  const collapseTimer = useRef<number | null>(null);
   const [complete, setComplete] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const { trigger } = useWebHaptics();
@@ -57,12 +62,26 @@ export default function FlashcardsPage() {
   }, [revealed, record?.rank]);
 
   useEffect(() => {
+    return () => {
+      if (collapseTimer.current !== null) window.clearTimeout(collapseTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
     const timer = window.setTimeout(() => {
       setDeck(shuffle(staticRecords));
       setPosition(0);
     }, 0);
     return () => window.clearTimeout(timer);
   }, []);
+
+  function cancelCollapse() {
+    if (collapseTimer.current !== null) {
+      window.clearTimeout(collapseTimer.current);
+      collapseTimer.current = null;
+    }
+    setCollapsing(false);
+  }
 
   function reveal() {
     if (!record) return;
@@ -74,6 +93,7 @@ export default function FlashcardsPage() {
 
   function nextCard() {
     if (!record) return;
+    cancelCollapse();
     if (position >= deck.length - 1) {
       setComplete(true);
       setRevealed(false);
@@ -89,12 +109,26 @@ export default function FlashcardsPage() {
   }
 
   function showFront() {
-    setRevealed(false);
+    if (collapsing) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setRevealed(false);
+      setAnnouncement("Front of the card restored.");
+      window.setTimeout(() => wordRef.current?.focus({ preventScroll: true }), 0);
+      return;
+    }
+    // Keep the back mounted at full height while the veil plays, then unmount.
+    setCollapsing(true);
+    collapseTimer.current = window.setTimeout(() => {
+      collapseTimer.current = null;
+      setRevealed(false);
+      setCollapsing(false);
+    }, COLLAPSE_MS);
     setAnnouncement("Front of the card restored.");
     window.setTimeout(() => wordRef.current?.focus({ preventScroll: true }), 0);
   }
 
   function shuffleAgain() {
+    cancelCollapse();
     setDeck(shuffle(staticRecords));
     setPosition(0);
     setRevealed(false);
@@ -131,7 +165,7 @@ export default function FlashcardsPage() {
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
             </div>
           ) : (
-            <article className={"flashcard" + (revealed ? " flashcard--revealed" : "")} aria-label={displayWord(record)}>
+            <article className={"flashcard" + (revealed ? " flashcard--revealed" : "") + (collapsing ? " flashcard--collapsing" : "")} aria-label={displayWord(record)}>
               <div className="flashcard-topline">
                 <span>
                   {deck.length === staticRecords.length ? `Card ${position + 1} / ${deck.length.toLocaleString()} · ` : ""}
