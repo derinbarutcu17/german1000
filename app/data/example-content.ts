@@ -301,11 +301,6 @@ function cleanSourceExamples(word: string, kind: WordKind): ExampleSeed[] {
   return scored;
 }
 
-function hasExactWord(sentence: string, word: string) {
-  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return new RegExp(`(?:^|[^\\p{L}\\p{M}\\p{N}])${escaped}(?=$|[^\\p{L}\\p{M}\\p{N}])`, "iu").test(sentence);
-}
-
 // The record word must appear in the sentence in a casing consistent with its
 // word type: nouns and names need an uppercase occurrence (German nouns are
 // capitalized); lowercase forms (verbs, adjectives, function words) need a
