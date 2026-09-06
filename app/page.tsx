@@ -137,39 +137,39 @@ export default function FlashcardsPage() {
                   {deck.length === staticRecords.length ? `Card ${position + 1} / ${deck.length.toLocaleString()} · ` : ""}
                   Frequency #{String(record.rank).padStart(3, "0")}
                 </span>
-                <button type="button" className="skip-button" aria-label="Skip card" onClick={nextCard}>
-                  <span className="skip-button__label">Skip</span>
-                  <svg className="skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
-                  </svg>
-                </button>
               </div>
 
               <div className="flashcard-front">
-                <button
-                  type="button"
-                  className="flashcard-word"
-                  ref={wordRef}
-                  onClick={() => (revealed ? showFront() : reveal())}
-                  aria-expanded={revealed}
-                  aria-controls="flashcard-back"
-                  aria-label={revealed ? displayWord(record) + ", hide meaning" : displayWord(record) + ", tap to reveal meaning"}
-                >
-                  <span className="flashcard-word__text" lang="de">
-                    <TextReveal
-                      key={record.rank}
-                      text={displayWord(record)}
-                      by="character"
-                      startOnView={false}
-                      stagger={0.018}
-                      maxDuration={0.5}
-                      delay={0.45}
-                    />
-                  </span>
-                  {!revealed && (
-                    <span className="flashcard-word__hint" aria-hidden="true">Tap to reveal ↓</span>
-                  )}
-                </button>
+                <div className="flashcard-wordrow">
+                  <button
+                    type="button"
+                    className="flashcard-word"
+                    ref={wordRef}
+                    onClick={() => (revealed ? showFront() : reveal())}
+                    aria-expanded={revealed}
+                    aria-controls="flashcard-back"
+                    aria-label={revealed ? displayWord(record) + ", hide meaning" : displayWord(record) + ", tap to reveal meaning"}
+                  >
+                    <span className="flashcard-word__text" lang="de">
+                      <TextReveal
+                        key={record.rank}
+                        text={displayWord(record)}
+                        by="character"
+                        startOnView={false}
+                        stagger={0.018}
+                        maxDuration={0.5}
+                        delay={0.45}
+                      />
+                    </span>
+                  </button>
+                  <button type="button" className="skip-button" aria-label="Skip card" onClick={nextCard}>
+                    <span className="skip-button__label">Skip</span>
+                    <svg className="skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+                    </svg>
+                  </button>
+                </div>
+                {!revealed && <span className="flashcard-word__hint" aria-hidden="true">Tap to reveal ↓</span>}
               </div>
 
               <div className="flashcard-back-wrap" style={{ height: revealed && backH ? backH : 0 }} aria-hidden={!revealed}>

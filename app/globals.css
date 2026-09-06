@@ -1462,43 +1462,58 @@ summary {
   font-weight: 750;
 }
 .skip-button {
-  min-width: 76px;
-  height: 44px;
-  padding: 0 12px;
+  min-width: 64px;
+  height: 48px;
+  padding: 0 8px;
   flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   border: 0;
-  border-radius: 999px;
-  background: var(--ink);
-  color: var(--card);
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 0.16s ease, background-color 0.16s ease;
+  transition: transform 0.16s ease, color 0.16s ease;
 }
 .skip-button__label {
   color: inherit !important;
   font-family: var(--font-sans) !important;
-  font-size: 12px !important;
+  font-size: 20px !important;
   font-weight: 700 !important;
   letter-spacing: 0 !important;
 }
 .skip-button:hover {
-  background: var(--accent-strong);
+  color: var(--accent-strong);
 }
 .skip-button:active {
   transform: scale(0.96);
 }
 .skip-icon {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
 .flashcard-front {
   padding-block: clamp(8px, 3vw, 32px) 48px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.flashcard-wordrow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 4px 16px;
+  flex-wrap: wrap;
+}
+.flashcard-wordrow .flashcard-word {
+  width: auto;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.flashcard-wordrow .skip-button {
+  margin-left: auto;
 }
 .flashcard-word {
   width: 100%;
@@ -2067,6 +2082,20 @@ summary {
   }
   .flashcard-front {
     padding-bottom: 32px;
+  }
+  .flashcard-wordrow .skip-button {
+    height: 44px;
+    min-width: 52px;
+  }
+  .flashcard-wordrow .skip-button__label {
+    font-size: 16px !important;
+  }
+  .flashcard-wordrow .skip-icon {
+    width: 20px;
+    height: 20px;
+  }
+  .flashcard-word__hint {
+    margin-top: 16px;
   }
   .exercise-page .section-heading {
     gap: 12px;
