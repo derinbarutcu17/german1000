@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 export function EmptyState({ eyebrow, title, body, children, action }: { eyebrow?: string; title: string; body?: ReactNode; children?: ReactNode; action?: ReactNode }) {
   return (
-    <div className="empty-state empty-state-composed">
+    <div className="empty-state empty-state-composed surface-enter">
       {eyebrow && <p className="eyebrow">{eyebrow}</p>}
       <h3>{title}</h3>
       <p>{body ?? children}</p>

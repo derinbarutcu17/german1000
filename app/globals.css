@@ -146,6 +146,36 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Mobile polish: no tap flash on any tappable surface, and no accidental
+   text selection on interactive chrome. Readable content (examples, glosses,
+   explanations) stays selectable. Keyboard focus rings remain intact. */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+a,
+summary,
+nav,
+.topbar,
+.bottom-nav,
+.score-card,
+.session-picker,
+.exercise-card__header,
+.flashcard-topline,
+.choice,
+.exercise-skip,
+.word-details__trigger,
+.filter-chip {
+  -webkit-user-select: none;
+  user-select: none;
+}
+input,
+textarea,
+[contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1014,6 +1044,37 @@ summary {
   letter-spacing: 0.02em;
   text-transform: none;
 }
+/* Top-right advance control: "Skip" until an answer is chosen, then
+   "Next question". Plain text, generous tap target, no pill. */
+.exercise-skip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin: -12px 0;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+.exercise-skip:hover {
+  color: var(--accent-strong);
+}
+.exercise-skip:active {
+  transform: scale(0.97);
+}
+.exercise-skip .skip-icon {
+  width: 18px;
+  height: 18px;
+}
 .exercise-viewport {
   position: relative;
   isolation: isolate;
@@ -1096,7 +1157,7 @@ summary {
 .choice:active {
   transform: scale(0.985);
 }
-.choice:focus-within {
+.choice:has(input:focus-visible) {
   background: var(--accent-soft);
   box-shadow: inset 0 0 0 2px var(--accent-strong);
 }
@@ -1112,6 +1173,11 @@ summary {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+}
+/* The invisible radio never draws its own ring; keyboard focus shows on the
+   whole row via :has(input:focus-visible) above. */
+.choice input:focus-visible {
+  outline: none;
 }
 .choice__letter {
   flex: 0 0 auto;
@@ -1189,7 +1255,7 @@ summary {
 .exercise-actions .button {
   min-height: 48px;
   min-width: 168px;
-  border-radius: 0;
+  border-radius: 10px;
   font-weight: 650;
 }
 .exercise-position {
@@ -1688,10 +1754,76 @@ summary {
 .flashcard--complete .button {
   margin-top: 24px;
 }
-.flashcard-loading-mark {
+/* Uniform loader: three pulsing dots. No emoji glyphs anywhere. */
+.loading-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   color: var(--accent);
-  font-size: 28px;
-  line-height: 1;
+}
+.loading-mark__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+  animation: loading-pulse 1.05s ease-in-out infinite;
+}
+.loading-mark__dot:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.loading-mark__dot:nth-child(3) {
+  animation-delay: 0.32s;
+}
+@keyframes loading-pulse {
+  0%, 100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-mark__dot {
+    animation: none;
+    opacity: 0.55;
+  }
+}
+
+/* Uniform surface entrance: every page's content resolves the same way the
+   card back does — blur + rise + fade. Uses `backwards` fill (not `both`) so
+   no filter/transform lingers after the run, keeping content-visibility
+   working on the long word list. Reduced motion resolves instantly. */
+.surface-enter {
+  animation: surface-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@keyframes surface-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .surface-enter {
+    animation: none;
+  }
+}
+
+/* Route-level loading shell (client navigation between pages). */
+.route-loading {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--page-top-space) var(--page-gutter);
+  animation: surface-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 .word-index {
@@ -1699,7 +1831,7 @@ summary {
 }
 .word-card--index {
   content-visibility: auto;
-  contain-intrinsic-size: 300px;
+  contain-intrinsic-size: auto 220px;
   position: relative;
   min-width: 0;
   padding: 24px 0 28px;
@@ -1818,7 +1950,7 @@ summary {
   .flashcard--loading {
     border: 1px solid ButtonText;
   }
-  .flashcard-loading-mark {
+  .loading-mark {
     color: ButtonText;
   }
 }
@@ -2008,6 +2140,12 @@ summary {
 }
 .explore-search .field input:focus-visible {
   outline-offset: 4px;
+}
+/* Touch: caret + accent underline are enough; no blue focus box on tap. */
+@media (hover: none) {
+  .explore-search .field input:focus-visible {
+    outline: none;
+  }
 }
 .explore-search__count {
   flex: 0 0 auto;

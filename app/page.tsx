@@ -16,6 +16,9 @@ const INITIAL_CARD: WordRecord = staticRecords[0];
 // Must cover the whole bottom-to-top veil: gloss starts at 0.25s, runs 0.35s.
 const COLLAPSE_MS = 620;
 
+// Client-only layout effect: runs before paint, but skips the SSR warning.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 function focusElement(element: HTMLElement | null) {
   if (!element) return;
   // Focus without the browser's instant jump, then only nudge the page if
@@ -67,12 +70,11 @@ export default function FlashcardsPage() {
     };
   }, []);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setDeck(shuffle(staticRecords));
-      setPosition(0);
-    }, 0);
-    return () => window.clearTimeout(timer);
+  // Shuffle before the first paint so the seeded card #001 never flashes,
+  // while keeping the server-rendered markup deterministic for hydration.
+  useIsomorphicLayoutEffect(() => {
+    setDeck(shuffle(staticRecords));
+    setPosition(0);
   }, []);
 
   function cancelCollapse() {
@@ -157,15 +159,14 @@ export default function FlashcardsPage() {
 
         <section className="card-studio" id="flashcard" aria-label="Flashcards">
           {complete ? (
-            <div className="flashcard flashcard--complete" ref={completeRef} tabIndex={-1} aria-live="polite">
-              <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
+            <div className="flashcard flashcard--complete surface-enter" ref={completeRef} tabIndex={-1} aria-live="polite">
               <p className="eyebrow">Round complete</p>
               <h3>All 1,000 words wandered through.</h3>
               <p>You saw every card in this temporary order. Shuffle again whenever you want a new path through the same vocabulary.</p>
               <button className="button button-dark" type="button" onClick={shuffleAgain}>Shuffle all 1,000 again <span aria-hidden="true">↗</span></button>
             </div>
           ) : (
-            <article className={"flashcard" + (revealed ? " flashcard--revealed" : "") + (collapsing ? " flashcard--collapsing" : "")} aria-label={displayWord(record)}>
+            <article className={"flashcard surface-enter" + (revealed ? " flashcard--revealed" : "") + (collapsing ? " flashcard--collapsing" : "")} aria-label={displayWord(record)}>
               <div className="flashcard-topline">
                 <span>
                   {deck.length === staticRecords.length ? `Card ${position + 1} / ${deck.length.toLocaleString()} · ` : ""}

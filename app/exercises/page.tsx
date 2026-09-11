@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useWebHaptics } from "web-haptics/react";
 import { AppShell } from "../components/AppShell";
+import { LoadingMark } from "../components/LoadingMark";
 import { WordExamples } from "../components/WordExamples";
-import type { WordRecord } from "../data/records";
+import { records, type WordRecord } from "../data/records";
 import { buildExerciseBank, type ExerciseItem } from "../lib/exercises";
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -14,6 +15,9 @@ const letters = ["A", "B", "C", "D"] as const;
 const SESSION_SIZES = [10, 25, 50, 1000] as const;
 type SessionSize = (typeof SESSION_SIZES)[number];
 const DEFAULT_SESSION_SIZE: SessionSize = 25;
+
+// Client-only layout effect: runs before paint, but skips the SSR warning.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 export default function ExercisesPage() {
   const [bank, setBank] = useState<ExerciseItem[]>([]);
@@ -61,19 +65,11 @@ export default function ExercisesPage() {
     [complete, shouldReduceMotion],
   );
 
-  useEffect(() => {
-    let active = true;
-    const timer = window.setTimeout(() => {
-      void import("../data/records").then(({ records: loadedRecords }) => {
-        if (!active) return;
-        recordsRef.current = loadedRecords;
-        setBank(buildExerciseBank(loadedRecords, DEFAULT_SESSION_SIZE));
-      });
-    }, 0);
-    return () => {
-      active = false;
-      window.clearTimeout(timer);
-    };
+  // Records are local, so build the first round before paint: no loader
+  // flash on arrival, and a deterministic SSR shell for hydration.
+  useIsomorphicLayoutEffect(() => {
+    recordsRef.current = records;
+    setBank(buildExerciseBank(records, DEFAULT_SESSION_SIZE));
   }, []);
 
   useEffect(() => {
@@ -207,8 +203,8 @@ export default function ExercisesPage() {
         </section>
 
         {!bank.length ? (
-          <div className="exercise-card exercise-loading" aria-live="polite">
-            <span className="flashcard-loading-mark" aria-hidden="true">✳</span>
+          <div className="exercise-card exercise-loading surface-enter" aria-live="polite">
+            <LoadingMark />
             <h2>Finding a fresh path through the vocabulary.</h2>
           </div>
         ) : complete ? (
@@ -227,7 +223,7 @@ export default function ExercisesPage() {
             </div>
           </motion.section>
         ) : item ? (
-          <div className="exercise-viewport">
+          <div className="exercise-viewport surface-enter">
             <AnimatePresence mode="wait">
               <motion.section
                 key={item.record.rank}
@@ -242,6 +238,12 @@ export default function ExercisesPage() {
                   <span>
                     Question <strong>{index + 1}</strong> / {bank.length.toLocaleString()}
                   </span>
+                  <button type="button" className="exercise-skip" onClick={nextQuestion}>
+                    {selected || submitted ? "Next question" : "Skip"}
+                    <svg className="skip-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M5 12h14" /><path d="m13 6 6 6-6 6" />
+                    </svg>
+                  </button>
                 </div>
 
                 <div className="exercise-prompt">

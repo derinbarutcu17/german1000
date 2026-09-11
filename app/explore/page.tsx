@@ -102,7 +102,7 @@ export default function ExplorePage() {
         </div>
 
         {filtered.length > 0 ? (
-          <section className="explore-results" aria-label="Words">
+          <section className="explore-results surface-enter" aria-label="Words">
             <div className="explore-results-meta" aria-label={query.q ? "Results sorted by relevance" : "Words sorted by frequency"}>
               <span>{query.q ? "Relevance" : "Frequency order"}</span>
             </div>
