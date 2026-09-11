@@ -2,6 +2,7 @@ import { nounInfo } from "../nouns";
 import { frequencyWords, type FrequencyWord } from "../words";
 import { firstMeaning } from "../lib/word-utils";
 import { buildExamples, buildExplanation, fallbackForLevel, isMetaExample } from "./example-content";
+import { correctedExamplesByRank } from "./corrected-examples";
 export { displayWord, firstMeaning } from "../lib/word-utils";
 
 function cefrScore(de: string): number {
@@ -263,7 +264,13 @@ const curated: Record<string, CuratedNote> = {
   },
   // Lowercase corpus forms whose glosses are clearly nouns/adjectives — the
   // classifier can't see corpus casing, so fix the word-type labels here.
-  leben: { kind: "noun" },
+  leben: {
+    kind: "verb",
+    gloss: "to live",
+    explanation: "Leben means to live. It describes where someone lives, how they conduct their life, or a way of living.",
+    usageNote: "This entry is the verb leben, not the noun das Leben.",
+    reviewStatus: "editor-reviewed",
+  },
   sorgen: { kind: "noun" },
   wand: { kind: "noun" },
   unterschied: { kind: "noun" },
@@ -281,7 +288,10 @@ const curated: Record<string, CuratedNote> = {
     reviewStatus: "editor-reviewed",
   },
   fest: {
-    kind: "noun",
+    kind: "adjective",
+    gloss: "firm; firmly; fixed",
+    explanation: "Fest can describe something firm or fixed and can also function adverbially. It is distinct from the noun das Fest, meaning celebration.",
+    usageNote: "This entry uses the adjective or adverb fest, not the noun das Fest.",
     examples: [
       { level: "A2", de: "Zum Geburtstag gab es ein großes Fest im Garten.", en: "There was a big celebration in the garden for the birthday." },
       { level: "B2", de: "Die Stadt feiert jedes Jahr ein internationales Fest.", en: "The city hosts an international festival every year." },
@@ -299,7 +309,10 @@ const curated: Record<string, CuratedNote> = {
     reviewStatus: "editor-reviewed",
   },
   wert: {
-    kind: "noun",
+    kind: "adjective",
+    gloss: "worth",
+    explanation: "Wert in this entry means worth and is used in the construction etwas wert sein.",
+    usageNote: "This entry uses the adjective wert, not the noun der Wert, meaning value.",
     examples: [
       { level: "A2", de: "Gesundheit hat für mich den höchsten Wert.", en: "For me, health has the highest value." },
       { level: "B2", de: "Mit den Jahren verlor das alte Gerät deutlich an Wert.", en: "Over the years the old device clearly lost value." },
@@ -405,10 +418,15 @@ function makeRecord(word: FrequencyWord): WordRecord {
   const lemma = note?.lemma ?? noun?.lemma;
   const gloss = note?.gloss ?? word.gloss;
   const explanation = note?.explanation ?? buildExplanation(word.word, kind, gloss, noun);
-  const rawExamples = note?.examples ?? buildExamples(word.word, kind, noun);
+  const correctedExamples = correctedExamplesByRank[word.rank - 1];
+  const rawExamples = correctedExamples
+    ? correctedExamples.map(([de, en, level]) => ({ de, en, level, sourceKind: "context-template" as const }))
+    : note?.examples ?? buildExamples(word.word, kind, noun);
   // For curated notes, sort by CEFR score to ensure A2 ≤ B2 ≤ C1, then assign levels
   let withLevels: Example[];
-  if (note?.examples) {
+  if (correctedExamples) {
+    withLevels = rawExamples as Example[];
+  } else if (note?.examples) {
     const scored = [...rawExamples].sort((a, b) => cefrScore(a.de) - cefrScore(b.de));
     withLevels = scored.map((ex, i) => ({
       ...ex,

@@ -19,7 +19,7 @@ npm ci
 npm run dev
 ```
 
-The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), vocabulary data is in [`app/data/records.ts`](app/data/records.ts), sentence content is in [`app/data/example-content.ts`](app/data/example-content.ts) and [`app/data/tatoeba-examples.json`](app/data/tatoeba-examples.json), and the stateless shuffle utility is in [`app/lib/random.ts`](app/lib/random.ts).
+The main interface is in [`app/page.tsx`](app/page.tsx), styling is in [`app/globals.css`](app/globals.css), vocabulary data is in [`app/data/records.ts`](app/data/records.ts), the reviewed German sentence bank is in [`GERMAN-1000-EXAMPLES.txt`](GERMAN-1000-EXAMPLES.txt), its compiled runtime data is in [`app/data/corrected-examples.ts`](app/data/corrected-examples.ts), and the stateless shuffle utility is in [`app/lib/random.ts`](app/lib/random.ts).
 
 ## GitHub Pages release
 
